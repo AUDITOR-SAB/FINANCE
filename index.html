@@ -90,7 +90,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-                <input type="text" id="search-input" onkeyup="handleSearch()" class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-medium shadow-sm transition" placeholder="Search Church / Daerah..." data-placeholder="searchPlaceholder">
+                <input type="text" id="search-input" onkeyup="handleSearch()" class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-medium shadow-sm transition" placeholder="Search Church, Daerah, or PR Incharge..." data-placeholder="searchPlaceholder">
             </div>
 
             <section id="search-results-section" class="hidden flex flex-col gap-3">
@@ -173,7 +173,7 @@
         const actualCalendarYear = new Date().getFullYear().toString();
         const actualPreviousYear = (new Date().getFullYear() - 1).toString();
         const actualCurrentMonth = months[new Date().getMonth()];
-        let summaryMetrics = null; // Store fetched summary stats
+        let summaryMetrics = null; 
 
         const dict = {
             'en': {
@@ -182,7 +182,7 @@
                 'liveSync': 'Live Sync Active (5 mins cache)',
                 'selYear': 'Select Year',
                 'selView': 'Select View',
-                'searchPlaceholder': 'Search Church / Daerah...',
+                'searchPlaceholder': 'Search Church, Daerah, or PR Incharge...',
                 'searchResults': 'Search Results',
                 'clearSearch': 'Clear ✕',
                 'dashTitle': 'Wilayah Dashboard',
@@ -214,7 +214,7 @@
                 'liveSync': 'Penyegerakan Aktif (5 min cache)',
                 'selYear': 'Pilih Tahun',
                 'selView': 'Pilih Paparan',
-                'searchPlaceholder': 'Cari Gereja / Daerah...',
+                'searchPlaceholder': 'Cari Gereja, Daerah, atau PR Incharge...',
                 'searchResults': 'Hasil Carian',
                 'clearSearch': 'Padam ✕',
                 'dashTitle': 'Papan Pemuka Wilayah',
@@ -262,7 +262,7 @@
 
             updateTimestamp();
             renderMonthSelectors();
-            renderSummaryCards(); // Re-render translations in summary
+            renderSummaryCards();
             if (rawSheetData.length > 0) {
                 calculateAndRenderUI();
                 handleSearch(); 
@@ -291,7 +291,7 @@
             updateYearSelectorsUI();
             renderMonthSelectors();
             loadSheetFeed();
-            loadSummaryStats(); // Fetch background summary
+            loadSummaryStats(); 
         }
 
         function renderMonthSelectors() {
@@ -324,7 +324,7 @@
             });
         }
 
-        // Parse generic CSV to JSON array
+        // Updated parseCsvToArray to handle new PR Incharge (index 4) and Audit Status (index 17)
         function parseCsvToArray(text) {
             const lines = text.split('\n');
             if (lines.length < 2) return [];
@@ -332,10 +332,21 @@
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
                 const columns = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
-                if (columns.length < 5 || !columns[0]) continue;
-                const rowObj = { wilayah: columns[0], daerah: columns[1], gereja: columns[2], type: columns[3], months: {} };
+                if (columns.length < 6 || !columns[0]) continue; // Increased length check due to new columns
+                
+                const rowObj = { 
+                    wilayah: columns[0], 
+                    daerah: columns[1], 
+                    gereja: columns[2], 
+                    type: columns[3], 
+                    prIncharge: columns[4] || 'N/A', // New Data
+                    months: {},
+                    auditStatus: columns[17] || 'Pending' // New Data
+                };
+                
                 months.forEach((m, idx) => {
-                    const statusText = columns[4 + idx] ? columns[4 + idx].toLowerCase() : '';
+                    // Shifted by +5 since PR Incharge is at index 4, Jan starts at index 5
+                    const statusText = columns[5 + idx] ? columns[5 + idx].toLowerCase() : '';
                     rowObj.months[m] = statusText.includes('submit') ? 'Submitted' : 'Pending';
                 });
                 data.push(rowObj);
@@ -343,7 +354,6 @@
             return data;
         }
 
-        // --- NEW: BACKGROUND SUMMARY STATS FETCHER ---
         async function loadSummaryStats() {
             try {
                 const [prevRes, currRes] = await Promise.all([
@@ -354,7 +364,6 @@
                 const prevData = parseCsvToArray(await prevRes.text());
                 const currData = parseCsvToArray(await currRes.text());
 
-                // 1. Previous Year Pending Percentage
                 let prevTotal = 0; let prevPending = 0;
                 prevData.forEach(c => {
                     months.forEach(m => {
@@ -364,7 +373,6 @@
                 });
                 const prevYearPendingPercent = prevTotal > 0 ? Math.round((prevPending / prevTotal) * 100) : 0;
 
-                // 2. Current Month Pending Percentage
                 let currTotal = 0; let currPending = 0;
                 currData.forEach(c => {
                     currTotal++;
@@ -372,7 +380,6 @@
                 });
                 const currMonthPendingPercent = currTotal > 0 ? Math.round((currPending / currTotal) * 100) : 0;
 
-                // 3. Best Performing Wilayah (Current Month)
                 const wStats = {};
                 currData.forEach(c => {
                     if(!wStats[c.wilayah]) wStats[c.wilayah] = { t:0, s:0 };
@@ -385,7 +392,6 @@
                     if(p > bestP) { bestP = p; bestW = w; }
                 });
 
-                // Store metrics globally so language toggle can reuse them
                 summaryMetrics = { prevYearPendingPercent, currMonthPendingPercent, bestW, bestP };
                 renderSummaryCards();
 
@@ -467,13 +473,11 @@
                 const percent = stats.total > 0 ? Math.round((stats.submitted / stats.total) * 100) : 0;
                 const pendingCount = stats.total - stats.submitted;
                 
-                // STRICT GREEN (Submitted) and RED (Pending) logic.
                 const barFillClass = 'bg-emerald-500';
                 const ringFillClass = 'stroke-emerald-500';
                 const remainBarClass = percent === 100 ? 'bg-slate-100' : 'bg-rose-500';
                 const remainRingClass = percent === 100 ? 'text-slate-100' : 'text-rose-500';
 
-                // Rings
                 const card = document.createElement('div');
                 card.className = `relative bg-white p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center text-center gap-3 hover:shadow-md cursor-pointer print-shadow-none print-break-avoid ${selectedWilayah === w ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/10' : 'border-slate-100 shadow-sm hover:border-slate-300'}`;
                 
@@ -497,7 +501,6 @@
                 card.onclick = () => { selectedWilayah = w; calculateAndRenderUI(); renderDeepDive(w, stats); openDeepDiveModal(); };
                 gridContainer.appendChild(card);
 
-                // Bars
                 const barRow = document.createElement('div');
                 barRow.className = 'flex items-center gap-3 print-break-avoid';
                 barRow.innerHTML = `
@@ -511,7 +514,6 @@
             });
         }
 
-        // --- SEARCH BAR ---
         function clearSearch() { document.getElementById('search-input').value = ''; handleSearch(); }
         function handleSearch() {
             const query = document.getElementById('search-input').value.toLowerCase();
@@ -522,7 +524,14 @@
             if (!query) { stdDash.classList.remove('hidden'); srcDash.classList.add('hidden'); return; }
 
             stdDash.classList.add('hidden'); srcDash.classList.remove('hidden'); container.innerHTML = '';
-            const results = rawSheetData.filter(c => c.gereja.toLowerCase().includes(query) || c.daerah.toLowerCase().includes(query) || c.wilayah.toLowerCase().includes(query));
+            
+            // Updated search to also filter by PR Incharge
+            const results = rawSheetData.filter(c => 
+                c.gereja.toLowerCase().includes(query) || 
+                c.daerah.toLowerCase().includes(query) || 
+                c.wilayah.toLowerCase().includes(query) ||
+                c.prIncharge.toLowerCase().includes(query)
+            );
 
             if (results.length === 0) {
                 container.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-sm font-medium">No churches found matching "${query}"</div>`;
@@ -537,6 +546,7 @@
             });
         }
 
+        // Updated card UI to include PR and Audit badges
         function buildChurchCardHtml(c, showLocationTags = false) {
             let statusDisplay = '';
             if (currentMonth === 'FULL YEAR') {
@@ -554,6 +564,11 @@
             const extraTags = showLocationTags ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-white tracking-wider">W${c.wilayah}</span><span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 tracking-wider">${c.daerah}</span>` : '';
             const viewLabel = currentMonth !== 'FULL YEAR' ? currentMonth : getText('annual_audit');
             
+            // New Tags Added Here
+            const prTag = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 tracking-wider border border-blue-100">PR: ${c.prIncharge}</span>`;
+            const isAuditDone = c.auditStatus.toLowerCase().includes('done') || c.auditStatus.toLowerCase().includes('completed');
+            const auditTag = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isAuditDone ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'} tracking-wider border">Audit: ${c.auditStatus}</span>`;
+
             return `
                 <div class="flex items-center justify-between w-full">
                     <div class="flex flex-col gap-0.5 min-w-0">
@@ -561,7 +576,9 @@
                         <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                             ${extraTags}
                             <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 tracking-wider">${c.type}</span>
-                            ${!showLocationTags ? `<span class="text-[10px] text-slate-400 font-medium">${viewLabel}</span>` : ''}
+                            ${prTag}
+                            ${auditTag}
+                            ${!showLocationTags ? `<span class="text-[10px] text-slate-400 font-medium ml-1">${viewLabel}</span>` : ''}
                         </div>
                     </div>
                     ${currentMonth !== 'FULL YEAR' ? statusDisplay : ''}
