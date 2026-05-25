@@ -4,1503 +4,700 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TNO Report Submission Status — Sabah Mission</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --navy-950: #030712;
-            --navy-900: #0a0f1e;
-            --navy-800: #0d1526;
-            --navy-700: #111d33;
-            --navy-600: #162242;
-            --navy-500: #1e3058;
-            --glass-bg: rgba(255,255,255,0.04);
-            --glass-bg-hover: rgba(255,255,255,0.07);
-            --glass-border: rgba(255,255,255,0.08);
-            --glass-border-hover: rgba(255,255,255,0.16);
-            --glass-strong: rgba(255,255,255,0.10);
-            --accent-blue: #3b82f6;
-            --accent-blue-soft: rgba(59,130,246,0.15);
-            --accent-blue-glow: rgba(59,130,246,0.25);
-            --accent-emerald: #10b981;
-            --accent-emerald-soft: rgba(16,185,129,0.15);
-            --accent-rose: #f43f5e;
-            --accent-rose-soft: rgba(244,63,94,0.15);
-            --accent-amber: #f59e0b;
-            --accent-amber-soft: rgba(245,158,11,0.15);
-            --accent-violet: #8b5cf6;
-            --accent-violet-soft: rgba(139,92,246,0.15);
-            --text-primary: rgba(255,255,255,0.95);
-            --text-secondary: rgba(255,255,255,0.55);
-            --text-muted: rgba(255,255,255,0.30);
-            --font-display: 'Syne', sans-serif;
-            --font-body: 'DM Sans', sans-serif;
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 20px;
-            --radius-2xl: 24px;
-        }
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: var(--font-body);
-            background-color: var(--navy-900);
-            background-image:
-                radial-gradient(ellipse 80% 50% at 20% 0%, rgba(59,130,246,0.12) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139,92,246,0.08) 0%, transparent 50%),
-                radial-gradient(ellipse 40% 30% at 50% 50%, rgba(16,185,129,0.04) 0%, transparent 60%);
-            min-height: 100vh;
-            color: var(--text-primary);
-        }
-
-        /* ── HEADER ── */
-        .header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            background: rgba(10,15,30,0.85);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 0 2rem;
-        }
-        .header-inner {
-            max-width: 1400px;
-            margin: 0 auto;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-        .header-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .header-logo {
-            width: 36px;
-            height: 36px;
-            border-radius: var(--radius-sm);
-            background: var(--accent-blue-soft);
-            border: 1px solid rgba(59,130,246,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-display);
-            font-weight: 800;
-            font-size: 14px;
-            color: var(--accent-blue);
-            letter-spacing: -0.5px;
-            flex-shrink: 0;
-        }
-        .header-title {
-            font-family: var(--font-display);
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.3px;
-            line-height: 1.2;
-        }
-        .header-sub {
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .sync-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 99px;
-            padding: 5px 12px;
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-        .sync-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent-emerald);
-            box-shadow: 0 0 0 2px var(--accent-emerald-soft);
-            animation: syncPulse 2.5s ease-in-out infinite;
-        }
-        @keyframes syncPulse {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 2px var(--accent-emerald-soft); }
-            50% { opacity: 0.6; box-shadow: 0 0 0 4px rgba(16,185,129,0.05); }
-        }
-        .lang-toggle {
-            display: flex;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-        }
-        .lang-btn {
-            padding: 5px 12px;
-            font-size: 11px;
-            font-weight: 600;
-            font-family: var(--font-display);
-            color: var(--text-muted);
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            letter-spacing: 0.05em;
-        }
-        .lang-btn.active {
-            background: var(--accent-blue);
-            color: #fff;
-        }
-        .print-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            font-size: 12px;
-            font-weight: 600;
-            font-family: var(--font-display);
-            color: var(--text-secondary);
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .print-btn:hover { background: var(--glass-bg-hover); color: var(--text-primary); border-color: var(--glass-border-hover); }
-
-        /* ── LAYOUT ── */
-        .page-wrap {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-            display: flex;
-            gap: 1.5rem;
-            align-items: flex-start;
-        }
-
-        /* ── SIDEBAR ── */
-        .sidebar {
-            width: 220px;
-            flex-shrink: 0;
-            position: sticky;
-            top: 80px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .glass-panel {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-xl);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-        .sidebar-section {
-            padding: 16px;
-        }
-        .sidebar-label {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            font-family: var(--font-display);
-        }
-        .year-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
-        }
-        .year-btn {
-            padding: 6px 4px;
-            font-size: 11px;
-            font-weight: 700;
-            font-family: var(--font-display);
-            color: var(--text-muted);
-            background: transparent;
-            border: 1px solid transparent;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-        .year-btn:hover { color: var(--text-secondary); background: var(--glass-bg); }
-        .year-btn.active {
-            color: var(--accent-blue);
-            background: var(--accent-blue-soft);
-            border-color: rgba(59,130,246,0.3);
-        }
-        .month-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 4px;
-        }
-        .month-btn {
-            padding: 6px 4px;
-            font-size: 10px;
-            font-weight: 600;
-            font-family: var(--font-display);
-            color: var(--text-muted);
-            background: transparent;
-            border: 1px solid transparent;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            letter-spacing: 0.02em;
-        }
-        .month-btn:hover { color: var(--text-secondary); background: var(--glass-bg); }
-        .month-btn.active {
-            color: #fff;
-            background: var(--accent-blue);
-            border-color: transparent;
-        }
-        .fullyear-btn {
-            grid-column: span 3;
-            margin-top: 4px;
-            padding: 7px;
-            font-size: 10px;
-            font-weight: 600;
-            font-family: var(--font-display);
-            color: var(--text-secondary);
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            letter-spacing: 0.05em;
-        }
-        .fullyear-btn:hover { background: var(--glass-bg-hover); color: var(--text-primary); }
-        .fullyear-btn.active {
-            color: var(--accent-violet);
-            background: var(--accent-violet-soft);
-            border-color: rgba(139,92,246,0.3);
-        }
-        .sidebar-divider { border: none; border-top: 1px solid var(--glass-border); margin: 0; }
-        .mobile-select {
-            display: none;
-            width: 100%;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
-            font-family: var(--font-body);
-            font-size: 13px;
-            border-radius: var(--radius-md);
-            padding: 10px 12px;
-            outline: none;
-        }
-
-        /* ── MAIN CONTENT ── */
-        .main-content {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        /* ── SEARCH ── */
-        .search-wrap {
-            position: relative;
-        }
-        .search-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            width: 16px;
-            height: 16px;
-            pointer-events: none;
-        }
-        .search-input {
-            width: 100%;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            color: var(--text-primary);
-            font-family: var(--font-body);
-            font-size: 13px;
-            padding: 11px 14px 11px 40px;
-            outline: none;
-            transition: all 0.2s;
-        }
-        .search-input::placeholder { color: var(--text-muted); }
-        .search-input:focus { border-color: rgba(59,130,246,0.4); background: var(--glass-bg-hover); box-shadow: 0 0 0 3px var(--accent-blue-glow); }
-
-        /* ── EXEC SUMMARY ── */
-        .exec-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-        }
-        .section-heading {
-            font-family: var(--font-display);
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--text-muted);
-        }
-        .live-badge {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--accent-emerald);
-            background: var(--accent-emerald-soft);
-            border: 1px solid rgba(16,185,129,0.25);
-            padding: 3px 10px;
-            border-radius: 99px;
-        }
-        .exec-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-        .exec-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.25s;
-        }
-        .exec-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            border-radius: 2px 2px 0 0;
-        }
-        .exec-card.blue::before { background: linear-gradient(90deg, var(--accent-blue), transparent); }
-        .exec-card.rose::before { background: linear-gradient(90deg, var(--accent-rose), transparent); }
-        .exec-card.emerald::before { background: linear-gradient(90deg, var(--accent-emerald), transparent); }
-        .exec-card.amber::before { background: linear-gradient(90deg, var(--accent-amber), transparent); }
-        .exec-card-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-            margin-bottom: 2px;
-        }
-        .exec-card.blue .exec-card-icon { background: var(--accent-blue-soft); }
-        .exec-card.rose .exec-card-icon { background: var(--accent-rose-soft); }
-        .exec-card.emerald .exec-card-icon { background: var(--accent-emerald-soft); }
-        .exec-card.amber .exec-card-icon { background: var(--accent-amber-soft); }
-        .exec-card-label {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-muted);
-            font-family: var(--font-display);
-        }
-        .exec-card-value {
-            font-family: var(--font-display);
-            font-size: 28px;
-            font-weight: 800;
-            line-height: 1;
-            letter-spacing: -1px;
-        }
-        .exec-card.blue .exec-card-value { color: var(--accent-blue); }
-        .exec-card.rose .exec-card-value { color: var(--accent-rose); }
-        .exec-card.emerald .exec-card-value { color: var(--accent-emerald); }
-        .exec-card.amber .exec-card-value { color: var(--accent-amber); }
-        .exec-card-sub {
-            font-size: 11px;
-            color: var(--text-secondary);
-            line-height: 1.4;
-        }
-        .exec-insight {
-            display: flex;
-            align-items: flex-start;
-            gap: 6px;
-            margin-top: 4px;
-            padding: 7px 9px;
-            border-radius: var(--radius-sm);
-            font-size: 10px;
-            font-weight: 500;
-            line-height: 1.5;
-            color: var(--text-secondary);
-        }
-        .exec-card.blue .exec-insight { background: var(--accent-blue-soft); color: rgba(147,197,253,0.9); }
-        .exec-card.rose .exec-insight { background: var(--accent-rose-soft); color: rgba(253,164,175,0.9); }
-        .exec-card.emerald .exec-insight { background: var(--accent-emerald-soft); color: rgba(110,231,183,0.9); }
-        .exec-card.amber .exec-insight { background: var(--accent-amber-soft); color: rgba(252,211,77,0.9); }
-        .insight-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
-        .exec-card.blue .insight-dot { background: var(--accent-blue); }
-        .exec-card.rose .insight-dot { background: var(--accent-rose); }
-        .exec-card.emerald .insight-dot { background: var(--accent-emerald); }
-        .exec-card.amber .insight-dot { background: var(--accent-amber); }
-        .exec-skeleton { height: 120px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); animation: shimmer 1.8s ease-in-out infinite; }
-        @keyframes shimmer { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-
-        /* ── WILAYAH SECTION ── */
-        .wilayah-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-        }
-        .wilayah-heading {
-            font-family: var(--font-display);
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-secondary);
-        }
-        .global-pct-badge {
-            font-size: 12px;
-            font-weight: 700;
-            font-family: var(--font-display);
-            color: var(--accent-blue);
-            background: var(--accent-blue-soft);
-            border: 1px solid rgba(59,130,246,0.25);
-            padding: 4px 12px;
-            border-radius: 99px;
-        }
-        .wilayah-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-        }
-        .w-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-xl);
-            padding: 16px 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.25s;
-            text-align: center;
-        }
-        .w-card:hover { background: var(--glass-bg-hover); border-color: var(--glass-border-hover); transform: translateY(-2px); }
-        .w-card.active { border-color: rgba(59,130,246,0.5); background: var(--accent-blue-soft); box-shadow: 0 0 20px var(--accent-blue-glow); }
-        .w-card.complete { border-color: rgba(16,185,129,0.4); background: var(--accent-emerald-soft); }
-        .w-card.complete:hover { box-shadow: 0 0 20px rgba(16,185,129,0.2); }
-        .w-name {
-            font-family: var(--font-display);
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-secondary);
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-        .w-badge {
-            position: absolute;
-            top: -7px; right: -7px;
-            background: var(--accent-rose);
-            color: #fff;
-            font-size: 10px;
-            font-weight: 700;
-            font-family: var(--font-display);
-            min-width: 20px;
-            height: 20px;
-            padding: 0 5px;
-            border-radius: 99px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid var(--navy-900);
-            box-shadow: 0 0 8px rgba(244,63,94,0.5);
-        }
-        .ring-wrap { position: relative; width: 60px; height: 60px; }
-        .ring-wrap svg { transform: rotate(-90deg); }
-        .ring-center {
-            position: absolute; inset: 0;
-            display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-display);
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        .w-sub { font-size: 10px; color: var(--text-muted); font-weight: 500; }
-        .w-allin {
-            font-size: 9px;
-            font-weight: 700;
-            font-family: var(--font-display);
-            color: var(--accent-emerald);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        /* ── COMPARISON BARS ── */
-        .comp-grid { display: flex; flex-direction: column; gap: 10px; }
-        .comp-row { display: flex; align-items: center; gap: 12px; }
-        .comp-label { font-size: 11px; font-weight: 600; font-family: var(--font-display); color: var(--text-secondary); width: 68px; text-align: right; flex-shrink: 0; }
-        .comp-track { flex: 1; height: 8px; background: rgba(244,63,94,0.15); border-radius: 99px; overflow: hidden; }
-        .comp-fill { height: 100%; border-radius: 99px; background: var(--accent-emerald); transition: width 0.8s cubic-bezier(0.16,1,0.3,1); }
-        .comp-fill.full { background: var(--accent-emerald); box-shadow: 0 0 8px rgba(16,185,129,0.5); }
-        .comp-pct { font-size: 11px; font-weight: 700; font-family: var(--font-display); color: var(--text-secondary); width: 34px; flex-shrink: 0; }
-
-        /* ── LOADER ── */
-        .loader-wrap {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 60px 0;
-        }
-        .spinner {
-            width: 28px;
-            height: 28px;
-            border: 2px solid var(--glass-border);
-            border-top-color: var(--accent-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loader-text { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-
-        /* ── SEARCH RESULTS ── */
-        .search-results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .search-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .search-title { font-family: var(--font-display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent-blue); }
-        .clear-btn { font-size: 11px; font-weight: 600; color: var(--text-muted); background: none; border: none; cursor: pointer; transition: color 0.2s; }
-        .clear-btn:hover { color: var(--text-primary); }
-
-        /* ── CHURCH CARD ── */
-        .church-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            padding: 12px 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-        .church-card:hover { border-color: var(--glass-border-hover); }
-        .church-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-        .church-name { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
-        .church-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
-        .tag {
-            display: inline-flex;
-            align-items: center;
-            font-size: 9px;
-            font-weight: 600;
-            font-family: var(--font-display);
-            padding: 2px 7px;
-            border-radius: 4px;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-        .tag-wilayah { background: rgba(59,130,246,0.15); color: rgba(147,197,253,0.9); }
-        .tag-daerah { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-muted); }
-        .tag-type { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-muted); }
-        .tag-pic { background: var(--accent-violet-soft); color: rgba(196,181,253,0.9); }
-        .tag-audit-done { background: var(--accent-emerald-soft); color: rgba(110,231,183,0.9); }
-        .tag-audit-pending { background: var(--accent-amber-soft); color: rgba(252,211,77,0.9); }
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 10px;
-            font-weight: 700;
-            font-family: var(--font-display);
-            padding: 4px 10px;
-            border-radius: 99px;
-            flex-shrink: 0;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-        .status-submitted { background: var(--accent-emerald-soft); color: var(--accent-emerald); border: 1px solid rgba(16,185,129,0.25); }
-        .status-pending { background: var(--accent-rose-soft); color: var(--accent-rose); border: 1px solid rgba(244,63,94,0.25); }
-        .status-dot { width: 5px; height: 5px; border-radius: 50%; }
-        .status-submitted .status-dot { background: var(--accent-emerald); }
-        .status-pending .status-dot { background: var(--accent-rose); }
-
-        /* full year grid in church card */
-        .month-status-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; border-top: 1px solid var(--glass-border); padding-top: 8px; }
-        .month-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 2px; border-radius: 5px; }
-        .month-cell.sub { background: var(--accent-emerald-soft); }
-        .month-cell.pend { background: var(--accent-rose-soft); }
-        .month-cell-lbl { font-size: 7.5px; font-weight: 700; font-family: var(--font-display); letter-spacing: 0.05em; text-transform: uppercase; }
-        .month-cell.sub .month-cell-lbl { color: var(--accent-emerald); }
-        .month-cell.pend .month-cell-lbl { color: var(--accent-rose); }
-        .month-cell-icon { font-size: 10px; line-height: 1.2; }
-
-        /* ── DEEP DIVE MODAL ── */
-        .modal-overlay {
-            position: fixed; inset: 0;
-            z-index: 200;
-            background: rgba(3,7,18,0.75);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .modal-overlay.open { display: flex; }
-        .modal-overlay.visible { opacity: 1; }
-        .modal-box {
-            background: var(--navy-800);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-2xl);
-            width: 100%;
-            max-width: 900px;
-            max-height: 88vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transform: translateY(16px) scale(0.98);
-            transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
-            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-        }
-        .modal-overlay.visible .modal-box { transform: translateY(0) scale(1); }
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 18px 20px;
-            border-bottom: 1px solid var(--glass-border);
-            flex-shrink: 0;
-        }
-        .modal-title {
-            font-family: var(--font-display);
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.3px;
-        }
-        .modal-close {
-            width: 30px; height: 30px;
-            display: flex; align-items: center; justify-content: center;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 50%;
-            cursor: pointer;
-            color: var(--text-secondary);
-            font-size: 16px;
-            transition: all 0.2s;
-        }
-        .modal-close:hover { background: var(--glass-bg-hover); color: var(--text-primary); }
-        .modal-body {
-            overflow-y: auto;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            flex: 1;
-        }
-        .modal-body::-webkit-scrollbar { width: 4px; }
-        .modal-body::-webkit-scrollbar-track { background: transparent; }
-        .modal-body::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 99px; }
-        .daerah-block {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-        }
-        .daerah-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 14px;
-            background: var(--glass-bg);
-            border-bottom: 1px solid var(--glass-border);
-        }
-        .daerah-name {
-            font-family: var(--font-display);
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-        .daerah-pct {
-            font-size: 11px;
-            font-weight: 700;
-            font-family: var(--font-display);
-            padding: 2px 8px;
-            border-radius: 99px;
-        }
-        .daerah-pct.full { background: var(--accent-emerald-soft); color: var(--accent-emerald); }
-        .daerah-pct.partial { background: var(--glass-bg); color: var(--text-muted); }
-        .daerah-list { padding: 8px; display: flex; flex-direction: column; gap: 5px; }
-
-        /* ── FOOTER ── */
-        .footer {
-            text-align: center;
-            padding: 2rem;
-            margin-top: 2rem;
-            border-top: 1px solid var(--glass-border);
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .footer-copy { font-size: 11px; color: var(--text-muted); font-weight: 500; }
-        .footer-ts { font-size: 11px; color: var(--text-muted); font-weight: 600; }
-
-        /* ── RESPONSIVE ── */
-        @media (max-width: 1100px) {
-            .wilayah-grid { grid-template-columns: repeat(4, 1fr); }
-            .exec-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (max-width: 860px) {
-            .page-wrap { flex-direction: column; padding: 1rem; }
-            .sidebar { width: 100%; position: static; }
-            .month-grid-desktop { display: none; }
-            .mobile-select { display: block; }
-            .wilayah-grid { grid-template-columns: repeat(3, 1fr); }
-            .exec-grid { grid-template-columns: repeat(1, 1fr); }
-            .search-results-grid { grid-template-columns: 1fr; }
-            .modal-body { grid-template-columns: 1fr; }
-            .year-grid { grid-template-columns: repeat(4, 1fr); }
-        }
-        @media (max-width: 540px) {
-            .wilayah-grid { grid-template-columns: repeat(2, 1fr); }
-            .header { padding: 0 1rem; }
-            .header-title { font-size: 13px; }
-            .sync-badge { display: none; }
-        }
-
-        /* ── PRINT ── */
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .modal-scroll::-webkit-scrollbar { width: 6px; }
+        .modal-scroll::-webkit-scrollbar-track { background: transparent; }
+        .modal-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        
         @media print {
             body { background: white !important; color: black !important; }
-            .header, .sidebar, .search-wrap, .footer { display: none !important; }
-            .page-wrap { padding: 0; }
-            .glass-panel, .exec-card, .w-card, .church-card { background: white !important; border: 1px solid #e2e8f0 !important; }
-            .exec-card-value, .exec-card-label, .exec-card-sub, .w-name, .ring-center, .church-name { color: black !important; }
+            .print-hide { display: none !important; }
+            .print-w-full { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .print-break-avoid { break-inside: avoid; page-break-inside: avoid; }
+            .print-shadow-none { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
         }
-
-        .hidden { display: none !important; }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col selection:bg-blue-500 selection:text-white print:bg-white">
 
-<header class="header">
-    <div class="header-inner">
-        <div class="header-brand">
-            <div class="header-logo">SDA</div>
-            <div>
-                <div class="header-title" data-lang="title">TNO Report Submission Status</div>
-                <div class="header-sub" data-lang="subtitle">Sabah Mission — Finance Department</div>
+    <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40 px-4 md:px-8 py-3 md:py-4 print-hide">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center justify-between w-full md:w-auto gap-3 md:gap-4">
+                <div class="order-1 md:order-2 flex flex-col">
+                    <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-slate-900 leading-tight" data-lang="title">TNO Report Submission Status</h1>
+                    <p class="text-[10px] md:text-xs text-slate-500 font-bold tracking-wide uppercase" data-lang="subtitle">SABAH MISSION — FINANCE DEPARTMENT</p>
+                </div>
+                <img src="SDA-LOGO.png" alt="SDA Logo" class="h-10 md:h-12 w-auto object-contain order-2 md:order-1 shrink-0">
+            </div>
+
+            <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+                <div class="flex bg-slate-100 rounded-lg p-0.5 border border-slate-200">
+                    <button onclick="changeLang('en')" id="lang-en" class="px-3 py-1 text-xs font-bold rounded-md bg-white text-blue-700 transition shadow-sm border border-slate-200/50">EN</button>
+                    <button onclick="changeLang('bm')" id="lang-bm" class="px-3 py-1 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800 transition">BM</button>
+                </div>
+                <button onclick="window.print()" class="hidden md:flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    <span data-lang="printBtn">Print Report</span>
+                </button>
             </div>
         </div>
-        <div class="header-right">
-            <div class="sync-badge">
-                <span class="sync-dot"></span>
-                <span data-lang="liveSync">Live · 5 min cache</span>
-            </div>
-            <div class="lang-toggle">
-                <button class="lang-btn active" id="lang-en" onclick="changeLang('en')">EN</button>
-                <button class="lang-btn" id="lang-bm" onclick="changeLang('bm')">BM</button>
-            </div>
-            <button class="print-btn" onclick="window.print()">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                <span data-lang="printBtn">Print</span>
-            </button>
-        </div>
+    </header>
+
+    <div class="hidden print:block text-center py-6 border-b-2 border-slate-800 mb-6">
+        <h1 class="text-2xl font-bold uppercase text-black" data-lang="title">TNO Report Submission Status</h1>
+        <p class="text-sm text-slate-600 font-bold mt-1 uppercase" data-lang="subtitle">SABAH MISSION — FINANCE DEPARTMENT</p>
+        <p class="text-xs text-slate-500 mt-2 font-bold" id="print-timestamp"></p>
     </div>
-</header>
 
-<div class="page-wrap">
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <div class="glass-panel">
-            <div class="sidebar-section">
-                <div class="sidebar-label" data-lang="selYear">Year</div>
-                <div class="year-grid" id="year-selector">
-                    <button class="year-btn" onclick="changeYear('2023')" id="btn-2023">2023</button>
-                    <button class="year-btn" onclick="changeYear('2024')" id="btn-2024">2024</button>
-                    <button class="year-btn" onclick="changeYear('2025')" id="btn-2025">2025</button>
-                    <button class="year-btn" onclick="changeYear('2026')" id="btn-2026">2026</button>
-                </div>
+    <main class="max-w-7xl mx-auto w-full px-4 md:px-8 mt-6 flex-grow flex flex-col md:flex-row gap-6 items-start print-w-full">
+        
+        <section class="w-full md:w-80 shrink-0 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4 sticky md:top-24 z-30 print-hide">
+            <div class="bg-blue-50 text-blue-700 text-[10px] px-3 py-1.5 rounded-lg border border-blue-100 font-bold flex items-center justify-between">
+                <span class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                    <span data-lang="liveSync">Live Sync Active (5 mins cache)</span>
+                </span>
             </div>
-            <hr class="sidebar-divider">
-            <div class="sidebar-section">
-                <div class="sidebar-label" data-lang="selView">Month</div>
-                <!-- Desktop month grid -->
-                <div class="month-grid month-grid-desktop" id="month-track"></div>
-                <!-- Mobile dropdown -->
-                <select class="mobile-select" id="month-dropdown" onchange="changeMonth(this.value)"></select>
-            </div>
-        </div>
-    </aside>
 
-    <!-- MAIN -->
-    <main class="main-content">
-
-        <!-- Search -->
-        <div class="search-wrap">
-            <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            <input type="text" class="search-input" id="search-input" onkeyup="handleSearch()" data-placeholder="searchPlaceholder" placeholder="Search church / daerah...">
-        </div>
-
-        <!-- Search Results -->
-        <div id="search-results-section" class="hidden">
-            <div class="search-header">
-                <span class="search-title" data-lang="searchResults">Search Results</span>
-                <button class="clear-btn" onclick="clearSearch()" data-lang="clearSearch">Clear ✕</button>
-            </div>
-            <div class="search-results-grid" id="search-results-container"></div>
-        </div>
-
-        <!-- Standard Dashboard -->
-        <div id="standard-dashboard">
-
-            <!-- Executive Summary -->
-            <div class="glass-panel" style="padding: 20px; margin-bottom: 1.5rem;">
-                <div class="exec-header">
-                    <span class="section-heading" data-lang="summaryTitle">Executive Summary</span>
-                    <span class="live-badge">
-                        <span class="sync-dot" style="width:5px;height:5px;"></span>
-                        Live Analysis
-                    </span>
-                </div>
-                <div class="exec-grid" id="summary-cards-container">
-                    <div class="exec-skeleton"></div>
-                    <div class="exec-skeleton"></div>
-                    <div class="exec-skeleton"></div>
+            <div class="flex flex-col gap-2 border-b border-slate-100 pb-3">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400" data-lang="selYear">Select Year</span>
+                <div class="grid grid-cols-4 gap-1.5 bg-slate-100 p-1 rounded-xl" id="year-selector">
+                    <button onclick="changeYear('2023')" id="btn-2023" class="py-1.5 text-xs font-bold rounded-lg transition-all duration-200">2023</button>
+                    <button onclick="changeYear('2024')" id="btn-2024" class="py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800">2024</button>
+                    <button onclick="changeYear('2025')" id="btn-2025" class="py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800">2025</button>
+                    <button onclick="changeYear('2026')" id="btn-2026" class="py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800">2026</button>
                 </div>
             </div>
 
-            <!-- Wilayah Grid -->
-            <div class="glass-panel" style="padding: 20px; margin-bottom: 1.5rem;">
-                <div class="wilayah-header">
-                    <span class="wilayah-heading" id="dashboard-title">Wilayah Dashboard</span>
-                    <span class="global-pct-badge" id="global-percentage">0%</span>
+            <div class="flex flex-col gap-2">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400" data-lang="selView">Select View</span>
+                <div class="block md:hidden relative">
+                    <select id="month-dropdown" onchange="changeMonth(this.value)" class="w-full bg-slate-100 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-blue-500 block p-3 font-bold appearance-none shadow-sm"></select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
                 </div>
-                <div id="loader" class="loader-wrap">
-                    <div class="spinner"></div>
-                    <span class="loader-text" data-lang="fetching">Fetching live data…</span>
+                <div class="hidden md:grid md:grid-cols-3 gap-2" id="month-track"></div>
+            </div>
+        </section>
+
+        <div class="flex-grow w-full flex flex-col gap-6 print-w-full">
+            
+            <div class="relative print-hide">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-                <div class="wilayah-grid hidden" id="wilayah-grid"></div>
+                <input type="text" id="search-input" onkeyup="handleSearch()" class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-medium shadow-sm transition" placeholder="Search Church / Daerah..." data-placeholder="searchPlaceholder">
             </div>
 
-            <!-- Comparison Bars -->
-            <div class="glass-panel hidden" id="comparison-graph-section" style="padding: 20px;">
-                <div class="exec-header">
-                    <span class="section-heading" data-lang="compTitle">Submission Comparison</span>
-                    <span style="font-size:10px; color:var(--text-muted); font-weight:500;" data-lang="compSub">Wilayah vs. Wilayah</span>
+            <section id="search-results-section" class="hidden flex flex-col gap-3">
+                <div class="flex justify-between items-center px-1 border-b border-slate-200 pb-2">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-blue-600" data-lang="searchResults">Search Results</h2>
+                    <button onclick="clearSearch()" class="text-xs font-bold text-slate-400 hover:text-slate-600" data-lang="clearSearch">Clear ✕</button>
                 </div>
-                <div class="comp-grid" id="comparison-bars-container"></div>
-            </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-3" id="search-results-container"></div>
+            </section>
 
+            <div id="standard-dashboard" class="flex flex-col gap-6">
+                
+                <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4 print-break-avoid" id="summary-section">
+                    <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500" data-lang="summaryTitle">Executive Summary</h3>
+                        <span class="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold border border-blue-100">Live Analysis</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="summary-cards-container">
+                        <div class="animate-pulse h-20 bg-slate-100 rounded-xl w-full"></div>
+                        <div class="animate-pulse h-20 bg-slate-100 rounded-xl w-full"></div>
+                        <div class="animate-pulse h-20 bg-slate-100 rounded-xl w-full"></div>
+                    </div>
+                </section>
+
+                <section class="flex flex-col gap-3">
+                    <div class="flex justify-between items-center px-1">
+                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500" id="dashboard-title">Wilayah Dashboard</h2>
+                        <span class="text-xs font-bold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-100" id="global-percentage">0% Done</span>
+                    </div>
+                    <div id="loader" class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-3 w-full print-hide">
+                        <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p class="text-xs text-slate-400 font-medium animate-pulse" data-lang="fetching">Fetching live data...</p>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 hidden print:grid-cols-5" id="wilayah-grid"></div>
+                </section>
+
+                <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4 hidden print-break-avoid print-shadow-none" id="comparison-graph-section">
+                    <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500" data-lang="compTitle">Submission Comparison</h3>
+                        <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-semibold" data-lang="compSub">Wilayah vs. Wilayah</span>
+                    </div>
+                    <div id="comparison-bars-container" class="flex flex-col gap-3 mt-1"></div>
+                </section>
+
+            </div>
         </div>
     </main>
-</div>
 
-<footer class="footer">
-    <div class="footer-copy">Sabah Mission — Finance Department &copy; <span id="footer-year">2026</span></div>
-    <div class="footer-ts" id="live-timestamp-footer"></div>
-</footer>
+    <footer class="w-full text-center flex flex-col gap-1 text-[11px] font-medium text-slate-400 py-8 border-t border-slate-200/50 mt-12 bg-slate-100/50 print-hide">
+        <p>Sabah Mission — Finance Department &copy; <span id="footer-year">2026</span></p>
+        <p id="live-timestamp-footer" class="font-bold text-slate-500"></p>
+    </footer>
 
-<!-- Deep Dive Modal -->
-<div class="modal-overlay" id="deep-dive-modal" onclick="handleModalClick(event)">
-    <div class="modal-box" id="deep-dive-content">
-        <div class="modal-header">
-            <span class="modal-title" id="deep-dive-title">Deep-Dive Status</span>
-            <button class="modal-close" onclick="closeDeepDiveModal()">✕</button>
-        </div>
-        <div class="modal-body" id="church-cards-container"></div>
-    </div>
-</div>
-
-<script>
-    const SPREADSHEET_BASE_ID = '1x3GOISJ6VrvytCil-l_INYRK0HU_s_vf6U1Y2Lpzd8A';
-    const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-    const viewOptions = [...months, 'FULL YEAR'];
-
-    let currentYear = '';
-    let currentMonth = '';
-    let rawSheetData = [];
-    let selectedWilayah = null;
-    let currentLanguage = 'en';
-    let summaryMetrics = null;
-
-    const actualCalendarYear = new Date().getFullYear().toString();
-    const actualPreviousYear = (new Date().getFullYear() - 1).toString();
-    const actualCurrentMonth = months[new Date().getMonth()];
-
-    const dict = {
-        en: {
-            title: 'TNO Report Submission Status',
-            subtitle: 'SABAH MISSION — FINANCE DEPARTMENT',
-            liveSync: 'Live · 5 min cache',
-            selYear: 'Year',
-            selView: 'Month',
-            searchPlaceholder: 'Search church / daerah...',
-            searchResults: 'Search Results',
-            clearSearch: 'Clear ✕',
-            dashTitle: 'Wilayah Dashboard',
-            compTitle: 'Submission Comparison',
-            compSub: 'Wilayah vs. Wilayah',
-            deepTitle: 'Deep-Dive Status',
-            printBtn: 'Print',
-            fetching: 'Fetching live data…',
-            status_as_of: 'Status as of:',
-            pending: 'Pending',
-            submitted: 'Submitted',
-            received: 'Received',
-            all_in: 'All In',
-            full_year: 'Full Year',
-            full_year_lbl: 'Full Year Overview',
-            annual_view: 'Annual View',
-            annual_audit: 'Annual Audit View',
-            summaryTitle: 'Executive Summary',
-        },
-        bm: {
-            title: 'Status Penyerahan Laporan TNO',
-            subtitle: 'MISSION SABAH — JABATAN KEWANGAN',
-            liveSync: 'Langsung · 5 min cache',
-            selYear: 'Tahun',
-            selView: 'Bulan',
-            searchPlaceholder: 'Cari gereja / daerah...',
-            searchResults: 'Hasil Carian',
-            clearSearch: 'Padam ✕',
-            dashTitle: 'Papan Pemuka Wilayah',
-            compTitle: 'Perbandingan Penyerahan',
-            compSub: 'Wilayah vs. Wilayah',
-            deepTitle: 'Status Terperinci',
-            printBtn: 'Cetak',
-            fetching: 'Mengambil data langsung…',
-            status_as_of: 'Status setakat:',
-            pending: 'Tertunggak',
-            submitted: 'Dihantar',
-            received: 'Diterima',
-            all_in: 'Selesai',
-            full_year: 'Sepanjang Tahun',
-            full_year_lbl: 'Gambaran Tahunan',
-            annual_view: 'Paparan Tahunan',
-            annual_audit: 'Paparan Audit Tahunan',
-            summaryTitle: 'Ringkasan Eksekutif',
-        }
-    };
-
-    function getText(key) { return dict[currentLanguage][key] || key; }
-
-    function changeLang(lang) {
-        currentLanguage = lang;
-        document.getElementById('lang-en').className = 'lang-btn' + (lang === 'en' ? ' active' : '');
-        document.getElementById('lang-bm').className = 'lang-btn' + (lang === 'bm' ? ' active' : '');
-        document.querySelectorAll('[data-lang]').forEach(el => {
-            const k = el.getAttribute('data-lang');
-            if (dict[currentLanguage][k]) el.innerText = dict[currentLanguage][k];
-        });
-        document.querySelectorAll('[data-placeholder]').forEach(el => {
-            const k = el.getAttribute('data-placeholder');
-            if (dict[currentLanguage][k]) el.placeholder = dict[currentLanguage][k];
-        });
-        updateTimestamp();
-        renderMonthSelectors();
-        renderSummaryCards();
-        if (rawSheetData.length > 0) { calculateAndRenderUI(); handleSearch(); }
-    }
-
-    function updateTimestamp() {
-        const now = new Date();
-        const ts = `${getText('status_as_of')} ${now.toLocaleString()}`;
-        document.getElementById('live-timestamp-footer').innerText = ts;
-    }
-
-    function handleModalClick(e) { if (e.target === e.currentTarget) closeDeepDiveModal(); }
-
-    function initApp() {
-        currentYear = actualCalendarYear;
-        if (!['2023','2024','2025','2026'].includes(currentYear)) currentYear = '2026';
-        currentMonth = actualCurrentMonth;
-        document.getElementById('footer-year').innerText = new Date().getFullYear();
-        updateTimestamp();
-        updateYearSelectorsUI();
-        renderMonthSelectors();
-        loadSheetFeed();
-        loadSummaryStats();
-    }
-
-    function renderMonthSelectors() {
-        const track = document.getElementById('month-track');
-        const dropdown = document.getElementById('month-dropdown');
-        track.innerHTML = '';
-        dropdown.innerHTML = '';
-
-        months.forEach(m => {
-            const isActive = m === currentMonth;
-            const btn = document.createElement('button');
-            btn.className = 'month-btn' + (isActive ? ' active' : '');
-            btn.innerText = m.slice(0,3);
-            btn.onclick = () => changeMonth(m);
-            track.appendChild(btn);
-
-            const opt = document.createElement('option');
-            opt.value = m;
-            opt.innerText = `${m} ${currentYear}`;
-            if (isActive) opt.selected = true;
-            dropdown.appendChild(opt);
-        });
-
-        const fyBtn = document.createElement('button');
-        fyBtn.className = 'fullyear-btn' + (currentMonth === 'FULL YEAR' ? ' active' : '');
-        fyBtn.innerText = getText('full_year');
-        fyBtn.onclick = () => changeMonth('FULL YEAR');
-        track.appendChild(fyBtn);
-
-        const fyOpt = document.createElement('option');
-        fyOpt.value = 'FULL YEAR';
-        fyOpt.innerText = getText('full_year_lbl');
-        if (currentMonth === 'FULL YEAR') fyOpt.selected = true;
-        dropdown.appendChild(fyOpt);
-    }
-
-    function parseCsvToArray(text) {
-        const lines = text.split('\n');
-        if (lines.length < 2) return [];
-        const data = [];
-        for (let i = 1; i < lines.length; i++) {
-            if (!lines[i].trim()) continue;
-            const columns = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g,'').trim());
-            if (columns.length < 5 || !columns[0]) continue;
-            const rowObj = {
-                wilayah: columns[0],
-                daerah: columns[1],
-                gereja: columns[2],
-                type: columns[3],
-                prPic: columns[4] || '-',
-                audit: columns[5] || '-',
-                months: {}
-            };
-            months.forEach((m, idx) => {
-                const s = columns[6 + idx] ? columns[6 + idx].toLowerCase() : '';
-                rowObj.months[m] = s.includes('submit') ? 'Submitted' : 'Pending';
-            });
-            data.push(rowObj);
-        }
-        return data;
-    }
-
-    async function loadSummaryStats() {
-        try {
-            const [prevRes, currRes] = await Promise.all([
-                fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${actualPreviousYear}`),
-                fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${actualCalendarYear}`)
-            ]);
-
-            const prevData = parseCsvToArray(await prevRes.text());
-            const currData = parseCsvToArray(await currRes.text());
-
-            // Metric 1: Compliance velocity — how many months-worth of reports are still pending from last year
-            let prevTotal = 0, prevPending = 0;
-            prevData.forEach(c => { months.forEach(m => { prevTotal++; if (c.months[m] !== 'Submitted') prevPending++; }); });
-            const prevYearPendingPercent = prevTotal > 0 ? Math.round((prevPending / prevTotal) * 100) : 0;
-            const prevYearPendingCount = prevPending;
-
-            // Metric 2: Current month submission rate + churches at risk
-            let currTotal = 0, currSubmitted = 0, currPending = 0;
-            currData.forEach(c => {
-                currTotal++;
-                if (c.months[actualCurrentMonth] === 'Submitted') currSubmitted++; else currPending++;
-            });
-            const currMonthRate = currTotal > 0 ? Math.round((currSubmitted / currTotal) * 100) : 0;
-
-            // Metric 3: Chronic non-submitters — churches pending 3+ consecutive months this year
-            const monthsToNow = months.slice(0, months.indexOf(actualCurrentMonth) + 1);
-            let chronicCount = 0;
-            let chronicNames = [];
-            if (monthsToNow.length >= 3) {
-                currData.forEach(c => {
-                    const recentThree = monthsToNow.slice(-3);
-                    const allPending = recentThree.every(m => c.months[m] !== 'Submitted');
-                    if (allPending) { chronicCount++; chronicNames.push(c.gereja); }
-                });
-            }
-
-            // Metric 4: Best and worst wilayah this month
-            const wStats = {};
-            currData.forEach(c => {
-                if (!wStats[c.wilayah]) wStats[c.wilayah] = { t: 0, s: 0 };
-                wStats[c.wilayah].t++;
-                if (c.months[actualCurrentMonth] === 'Submitted') wStats[c.wilayah].s++;
-            });
-            let bestW = '-', bestP = -1, worstW = '-', worstP = 101;
-            Object.keys(wStats).forEach(w => {
-                const p = Math.round((wStats[w].s / wStats[w].t) * 100);
-                if (p > bestP) { bestP = p; bestW = w; }
-                if (p < worstP) { worstP = p; worstW = w; }
-            });
-
-            // Audit completion rate
-            let auditDone = 0, auditTotal = 0;
-            currData.forEach(c => {
-                if (c.audit && c.audit !== '-') {
-                    auditTotal++;
-                    if (c.audit.toLowerCase().includes('done')) auditDone++;
-                }
-            });
-            const auditRate = auditTotal > 0 ? Math.round((auditDone / auditTotal) * 100) : null;
-
-            summaryMetrics = {
-                prevYearPendingPercent, prevYearPendingCount,
-                currMonthRate, currPending,
-                chronicCount,
-                bestW, bestP, worstW, worstP,
-                auditRate, auditDone, auditTotal,
-                currTotal
-            };
-            renderSummaryCards();
-        } catch (err) {
-            console.error('Summary stats error:', err);
-            document.getElementById('summary-cards-container').innerHTML = `<p style="font-size:12px;color:var(--accent-rose);font-weight:600;">Analysis unavailable</p>`;
-        }
-    }
-
-    function renderSummaryCards() {
-        if (!summaryMetrics) return;
-        const { prevYearPendingPercent, prevYearPendingCount, currMonthRate, currPending, chronicCount, bestW, bestP, worstW, worstP, auditRate, auditDone, auditTotal, currTotal } = summaryMetrics;
-
-        // Card 1: Current month compliance
-        const riskLevel = currMonthRate >= 80 ? 'On track' : currMonthRate >= 50 ? 'Needs attention' : 'Critical';
-        const card1Color = currMonthRate >= 80 ? 'emerald' : currMonthRate >= 50 ? 'amber' : 'rose';
-        const card1Icon = currMonthRate >= 80 ? '✓' : currMonthRate >= 50 ? '!' : '✗';
-        const card1Insight = currPending > 0
-            ? `${currPending} of ${currTotal} churches have not submitted for ${actualCurrentMonth} ${actualCalendarYear}.`
-            : `All churches submitted for ${actualCurrentMonth}.`;
-
-        // Card 2: Chronic risk (3+ months pending)
-        const chronicColor = chronicCount === 0 ? 'emerald' : chronicCount <= 3 ? 'amber' : 'rose';
-        const chronicInsight = chronicCount === 0
-            ? `No churches are chronically behind for the past 3 months.`
-            : `${chronicCount} church${chronicCount > 1 ? 'es are' : ' is'} pending for 3+ consecutive months — escalation recommended.`;
-
-        // Card 3: Year-over-year backlog or audit health
-        let card3Html = '';
-        if (auditRate !== null) {
-            const auditColor = auditRate >= 80 ? 'blue' : auditRate >= 50 ? 'amber' : 'rose';
-            const auditInsight = auditRate === 100
-                ? `All ${auditTotal} tracked churches have been audited for ${actualCalendarYear}.`
-                : `${auditTotal - auditDone} church${auditTotal - auditDone !== 1 ? 'es' : ''} still pending audit completion.`;
-            card3Html = buildExecCard('blue', '📋', 'Audit Completion', `${auditRate}%`, `${auditDone}/${auditTotal} churches audited`, auditInsight);
-        } else {
-            const prevColor = prevYearPendingPercent === 0 ? 'emerald' : prevYearPendingPercent <= 15 ? 'amber' : 'rose';
-            const prevInsight = prevYearPendingPercent === 0
-                ? `All ${actualPreviousYear} reports are fully settled. Excellent compliance.`
-                : `${prevYearPendingCount} report${prevYearPendingCount !== 1 ? 's' : ''} from ${actualPreviousYear} remain unresolved. Follow-up required.`;
-            card3Html = buildExecCard(prevColor, '📁', `${actualPreviousYear} Backlog`, `${prevYearPendingPercent}%`, `Of annual total still pending`, prevInsight);
-        }
-
-        document.getElementById('summary-cards-container').innerHTML =
-            buildExecCard(card1Color, card1Icon, `Submission Rate (${actualCurrentMonth})`, `${currMonthRate}%`, riskLevel, card1Insight) +
-            buildExecCard(chronicColor, '⚠', 'Chronic Non-Submitters', `${chronicCount}`, `Churches · 3+ months pending`, chronicInsight) +
-            card3Html;
-    }
-
-    function buildExecCard(color, icon, label, value, sub, insight) {
-        return `
-        <div class="exec-card ${color}">
-            <div class="exec-card-icon">${icon}</div>
-            <div class="exec-card-label">${label}</div>
-            <div class="exec-card-value">${value}</div>
-            <div class="exec-card-sub">${sub}</div>
-            <div class="exec-insight"><span class="insight-dot"></span><span>${insight}</span></div>
-        </div>`;
-    }
-
-    async function loadSheetFeed() {
-        showLoader(true);
-        const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${currentYear}`;
-        try {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error('Network error');
-            rawSheetData = parseCsvToArray(await res.text());
-            updateTimestamp();
-            calculateAndRenderUI();
-        } catch (err) {
-            document.getElementById('loader').innerHTML = `<p style="font-size:12px;color:var(--accent-rose);font-weight:600;">Failed to sync data feed.</p>`;
-        }
-    }
-
-    function calculateAndRenderUI() {
-        showLoader(false);
-        const viewText = currentMonth === 'FULL YEAR' ? getText('annual_view') : currentMonth;
-        document.getElementById('dashboard-title').innerText = `${getText('dashTitle')} · ${viewText} ${currentYear}`;
-
-        const wilayahMap = {};
-        let totalChurches = 0, totalSubmitted = 0;
-
-        rawSheetData.forEach(item => {
-            const w = item.wilayah;
-            if (!w) return;
-            if (!wilayahMap[w]) wilayahMap[w] = { total: 0, submitted: 0, data: [] };
-            if (currentMonth === 'FULL YEAR') {
-                wilayahMap[w].total += 12; totalChurches += 12;
-                months.forEach(m => { if (item.months[m] === 'Submitted') { wilayahMap[w].submitted++; totalSubmitted++; } });
-            } else {
-                wilayahMap[w].total++; totalChurches++;
-                if ((item.months[currentMonth] || 'Pending') === 'Submitted') { wilayahMap[w].submitted++; totalSubmitted++; }
-            }
-            wilayahMap[w].data.push(item);
-        });
-
-        const globalPct = totalChurches > 0 ? Math.round((totalSubmitted / totalChurches) * 100) : 0;
-        document.getElementById('global-percentage').innerText = `${globalPct}% submitted`;
-
-        const grid = document.getElementById('wilayah-grid');
-        const bars = document.getElementById('comparison-bars-container');
-        grid.innerHTML = ''; bars.innerHTML = '';
-        document.getElementById('comparison-graph-section').classList.remove('hidden');
-
-        Object.keys(wilayahMap).sort((a,b) => a.localeCompare(b, undefined, {numeric:true})).forEach(w => {
-            const stats = wilayahMap[w];
-            const pct = stats.total > 0 ? Math.round((stats.submitted / stats.total) * 100) : 0;
-            const pending = stats.total - stats.submitted;
-            const isComplete = pct === 100;
-
-            const card = document.createElement('div');
-            card.className = `w-card${isComplete ? ' complete' : ''}${selectedWilayah === w ? ' active' : ''}`;
-
-            const ringTrackColor = isComplete ? 'rgba(16,185,129,0.2)' : 'rgba(244,63,94,0.2)';
-            const ringFillColor = isComplete ? '#10b981' : '#3b82f6';
-
-            card.innerHTML = `
-                ${pending > 0 ? `<span class="w-badge">${pending}</span>` : ''}
-                <span class="w-name">W${w}</span>
-                <div class="ring-wrap">
-                    <svg width="60" height="60" viewBox="0 0 36 36">
-                        <path stroke="${ringTrackColor}" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                        <path stroke="${ringFillColor}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${pct},100" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                    </svg>
-                    <div class="ring-center" style="${isComplete ? 'color:var(--accent-emerald)' : ''}">${pct}%</div>
-                </div>
-                <div>
-                    <div class="w-sub">${stats.submitted}/${stats.total}</div>
-                    ${isComplete ? `<div class="w-allin">${getText('all_in')}</div>` : ''}
-                </div>
-            `;
-            card.onclick = () => { selectedWilayah = w; calculateAndRenderUI(); renderDeepDive(w, stats); openDeepDiveModal(); };
-            grid.appendChild(card);
-
-            const barRow = document.createElement('div');
-            barRow.className = 'comp-row';
-            barRow.innerHTML = `
-                <span class="comp-label">Wilayah ${w}</span>
-                <div class="comp-track">
-                    <div class="comp-fill${isComplete ? ' full' : ''}" style="width:${pct}%"></div>
-                </div>
-                <span class="comp-pct">${pct}%</span>
-            `;
-            bars.appendChild(barRow);
-        });
-    }
-
-    function buildChurchCardHtml(c, showLocation = false) {
-        const isSub = (c.months[currentMonth] || 'Pending') === 'Submitted';
-
-        const locationTags = showLocation ? `
-            <span class="tag tag-wilayah">W${c.wilayah}</span>
-            <span class="tag tag-daerah">${c.daerah}</span>
-        ` : '';
-        const prTag = c.prPic && c.prPic !== '-' ? `<span class="tag tag-pic">👤 ${c.prPic}</span>` : '';
-        const auditLower = c.audit ? c.audit.toLowerCase() : '';
-        const auditTag = c.audit && c.audit !== '-'
-            ? `<span class="tag ${auditLower.includes('done') ? 'tag-audit-done' : 'tag-audit-pending'}">📋 ${c.audit}</span>`
-            : '';
-
-        let statusBlock = '';
-        if (currentMonth === 'FULL YEAR') {
-            let cellsHtml = '';
-            months.forEach(m => {
-                const s = c.months[m] === 'Submitted';
-                cellsHtml += `<div class="month-cell ${s ? 'sub' : 'pend'}">
-                    <span class="month-cell-lbl">${m.slice(0,1)}</span>
-                    <span class="month-cell-icon">${s ? '✓' : '✗'}</span>
-                </div>`;
-            });
-            statusBlock = `<div class="month-status-grid">${cellsHtml}</div>`;
-        } else {
-            statusBlock = `<span class="status-pill ${isSub ? 'status-submitted' : 'status-pending'}">
-                <span class="status-dot"></span>${isSub ? getText('submitted') : getText('pending')}
-            </span>`;
-        }
-
-        return `
-        <div class="church-card-top">
-            <div style="min-width:0;">
-                <div class="church-name">${c.gereja}</div>
-                <div class="church-tags">
-                    ${locationTags}
-                    <span class="tag tag-type">${c.type}</span>
-                    ${prTag}
-                    ${auditTag}
-                </div>
+    <div id="deep-dive-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300 print-hide">
+        <div class="bg-slate-50 w-full max-w-4xl max-h-[90vh] sm:max-h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="deep-dive-content">
+            <div class="bg-slate-800 text-white px-5 py-4 flex justify-between items-center shrink-0 shadow-md z-10">
+                <h3 class="text-sm md:text-base font-bold uppercase tracking-widest" id="deep-dive-title">Deep-Dive Status</h3>
+                <button onclick="closeDeepDiveModal()" class="text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-600 rounded-full w-8 h-8 flex items-center justify-center transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            ${currentMonth !== 'FULL YEAR' ? statusBlock : ''}
+            <div class="overflow-y-auto modal-scroll p-4 md:p-6 flex-grow bg-slate-50">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="church-cards-container"></div>
+            </div>
         </div>
-        ${currentMonth === 'FULL YEAR' ? statusBlock : ''}`;
-    }
+    </div>
 
-    function handleSearch() {
-        const query = document.getElementById('search-input').value.toLowerCase();
-        const stdDash = document.getElementById('standard-dashboard');
-        const srcSec = document.getElementById('search-results-section');
-        const container = document.getElementById('search-results-container');
+    <script>
+        const SPREADSHEET_BASE_ID = '1x3GOISJ6VrvytCil-l_INYRK0HU_s_vf6U1Y2Lpzd8A';
+        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const viewOptions = [...months, 'FULL YEAR']; 
+        
+        let currentYear = ''; 
+        let currentMonth = '';
+        let rawSheetData = [];
+        let selectedWilayah = null;
+        let currentLanguage = 'en';
 
-        if (!query) { stdDash.classList.remove('hidden'); srcSec.classList.add('hidden'); return; }
-        stdDash.classList.add('hidden'); srcSec.classList.remove('hidden'); container.innerHTML = '';
+        // Variables for live calendar detection
+        const actualCalendarYear = new Date().getFullYear().toString();
+        const actualPreviousYear = (new Date().getFullYear() - 1).toString();
+        const actualCurrentMonth = months[new Date().getMonth()];
+        let summaryMetrics = null; // Store fetched summary stats
 
-        const results = rawSheetData.filter(c =>
-            c.gereja.toLowerCase().includes(query) ||
-            c.daerah.toLowerCase().includes(query) ||
-            c.wilayah.toLowerCase().includes(query) ||
-            c.prPic.toLowerCase().includes(query)
-        );
-
-        if (results.length === 0) {
-            container.innerHTML = `<div style="grid-column:span 2;text-align:center;padding:2rem;color:var(--text-muted);font-size:13px;">No churches found for "${query}"</div>`;
-            return;
-        }
-        results.forEach(c => {
-            const card = document.createElement('div');
-            card.className = 'church-card';
-            card.innerHTML = buildChurchCardHtml(c, true);
-            container.appendChild(card);
-        });
-    }
-
-    function clearSearch() { document.getElementById('search-input').value = ''; handleSearch(); }
-
-    function renderDeepDive(wilayahName, stats) {
-        const container = document.getElementById('church-cards-container');
-        const viewText = currentMonth === 'FULL YEAR' ? getText('annual_view') : currentMonth;
-        document.getElementById('deep-dive-title').innerText = `Wilayah ${wilayahName} · ${viewText} ${currentYear}`;
-        container.innerHTML = '';
-
-        const daerahGroup = {};
-        stats.data.forEach(c => {
-            if (!daerahGroup[c.daerah]) daerahGroup[c.daerah] = [];
-            daerahGroup[c.daerah].push(c);
-        });
-
-        Object.keys(daerahGroup).sort().forEach(dName => {
-            const list = daerahGroup[dName];
-            list.sort((a,b) => {
-                if (currentMonth === 'FULL YEAR') {
-                    const pA = months.filter(m => a.months[m] !== 'Submitted').length;
-                    const pB = months.filter(m => b.months[m] !== 'Submitted').length;
-                    if (pA > 0 && pB === 0) return -1;
-                    if (pA === 0 && pB > 0) return 1;
-                    return a.gereja.localeCompare(b.gereja);
-                } else {
-                    const sA = a.months[currentMonth] === 'Submitted' ? 1 : 0;
-                    const sB = b.months[currentMonth] === 'Submitted' ? 1 : 0;
-                    return sA !== sB ? sA - sB : a.gereja.localeCompare(b.gereja);
-                }
-            });
-
-            let done = 0, total = 0;
-            if (currentMonth === 'FULL YEAR') {
-                list.forEach(c => { total += 12; months.forEach(m => { if (c.months[m] === 'Submitted') done++; }); });
-            } else {
-                total = list.length;
-                done = list.filter(c => c.months[currentMonth] === 'Submitted').length;
+        const dict = {
+            'en': {
+                'title': 'TNO Report Submission Status',
+                'subtitle': 'SABAH MISSION — FINANCE DEPARTMENT',
+                'liveSync': 'Live Sync Active (5 mins cache)',
+                'selYear': 'Select Year',
+                'selView': 'Select View',
+                'searchPlaceholder': 'Search Church / Daerah...',
+                'searchResults': 'Search Results',
+                'clearSearch': 'Clear ✕',
+                'dashTitle': 'Wilayah Dashboard',
+                'compTitle': 'Submission Comparison',
+                'compSub': 'Wilayah vs. Wilayah',
+                'deepTitle': 'Deep-Dive Status',
+                'printBtn': 'Print Report',
+                'fetching': 'Fetching live data from Google Sheets...',
+                'status_as_of': 'Status as of:',
+                'pending': 'Pending',
+                'submitted': 'Submitted',
+                'received': 'Received',
+                'all_in': '✨ All In!',
+                'full_year': 'FULL YEAR',
+                'full_year_lbl': '📊 Full Year Overview',
+                'annual_view': 'Annual View',
+                'annual_audit': 'Annual Audit View',
+                'summaryTitle': 'Executive Summary',
+                'sum_prev_title': `Pending Reports (${actualPreviousYear})`,
+                'sum_prev_sub': 'Of total year expectations',
+                'sum_curr_title': `Pending (${actualCurrentMonth} ${actualCalendarYear})`,
+                'sum_curr_sub': 'Churches yet to submit',
+                'sum_top_title': `Top Wilayah (${actualCurrentMonth})`,
+                'sum_top_sub': 'Submission rate'
+            },
+            'bm': {
+                'title': 'Status Penyerahan Laporan TNO',
+                'subtitle': 'MISSION SABAH — JABATAN KEWANGAN',
+                'liveSync': 'Penyegerakan Aktif (5 min cache)',
+                'selYear': 'Pilih Tahun',
+                'selView': 'Pilih Paparan',
+                'searchPlaceholder': 'Cari Gereja / Daerah...',
+                'searchResults': 'Hasil Carian',
+                'clearSearch': 'Padam ✕',
+                'dashTitle': 'Papan Pemuka Wilayah',
+                'compTitle': 'Perbandingan Penyerahan',
+                'compSub': 'Wilayah vs. Wilayah',
+                'deepTitle': 'Status Terperinci',
+                'printBtn': 'Cetak Laporan',
+                'fetching': 'Mengambil data langsung dari Google Sheets...',
+                'status_as_of': 'Status setakat:',
+                'pending': 'Tertunggak',
+                'submitted': 'Dihantar',
+                'received': 'Diterima',
+                'all_in': '✨ Selesai!',
+                'full_year': 'SEPANJANG TAHUN',
+                'full_year_lbl': '📊 Gambaran Keseluruhan Tahunan',
+                'annual_view': 'Paparan Tahunan',
+                'annual_audit': 'Paparan Audit Tahunan',
+                'summaryTitle': 'Ringkasan Eksekutif',
+                'sum_prev_title': `Laporan Tertunggak (${actualPreviousYear})`,
+                'sum_prev_sub': 'Daripada jangkaan tahunan',
+                'sum_curr_title': `Tertunggak (${actualCurrentMonth} ${actualCalendarYear})`,
+                'sum_curr_sub': 'Gereja belum menghantar',
+                'sum_top_title': `Wilayah Terbaik (${actualCurrentMonth})`,
+                'sum_top_sub': 'Kadar penyerahan'
             }
-            const dPct = total > 0 ? Math.round((done / total) * 100) : 0;
+        };
 
-            const block = document.createElement('div');
-            block.className = 'daerah-block';
-            const sanitized = dName.replace(/[^a-zA-Z0-9]/g,'-');
-            block.innerHTML = `
-                <div class="daerah-header">
-                    <span class="daerah-name">${dName}</span>
-                    <span class="daerah-pct ${dPct === 100 ? 'full' : 'partial'}">${dPct}%</span>
-                </div>
-                <div class="daerah-list" id="dlist-${sanitized}"></div>
-            `;
-            container.appendChild(block);
+        function getText(key) { return dict[currentLanguage][key] || key; }
 
-            const listEl = document.getElementById(`dlist-${sanitized}`);
-            list.forEach(c => {
-                const card = document.createElement('div');
-                card.className = 'church-card';
-                const isSub = currentMonth !== 'FULL YEAR' && c.months[currentMonth] === 'Submitted';
-                if (currentMonth !== 'FULL YEAR' && !isSub) card.style.opacity = '0.7';
-                card.innerHTML = buildChurchCardHtml(c, false);
-                listEl.appendChild(card);
+        function changeLang(lang) {
+            currentLanguage = lang;
+            
+            document.getElementById('lang-en').className = lang === 'en' ? 'px-3 py-1 text-xs font-bold rounded-md bg-white text-blue-700 transition shadow-sm border border-slate-200/50' : 'px-3 py-1 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800 transition';
+            document.getElementById('lang-bm').className = lang === 'bm' ? 'px-3 py-1 text-xs font-bold rounded-md bg-white text-blue-700 transition shadow-sm border border-slate-200/50' : 'px-3 py-1 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800 transition';
+
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const key = el.getAttribute('data-lang');
+                if (dict[currentLanguage][key]) el.innerText = dict[currentLanguage][key];
             });
-        });
-    }
 
-    function openDeepDiveModal() {
-        const modal = document.getElementById('deep-dive-modal');
-        modal.classList.add('open');
-        document.body.style.overflow = 'hidden';
-        requestAnimationFrame(() => { requestAnimationFrame(() => { modal.classList.add('visible'); }); });
-    }
+            document.querySelectorAll('[data-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-placeholder');
+                if (dict[currentLanguage][key]) el.placeholder = dict[currentLanguage][key];
+            });
 
-    function closeDeepDiveModal() {
-        const modal = document.getElementById('deep-dive-modal');
-        modal.classList.remove('visible');
-        setTimeout(() => { modal.classList.remove('open'); selectedWilayah = null; calculateAndRenderUI(); }, 300);
-        document.body.style.overflow = '';
-    }
-
-    function changeYear(y) {
-        if (currentYear === y) return;
-        currentYear = y;
-        updateYearSelectorsUI();
-        renderMonthSelectors();
-        loadSheetFeed();
-    }
-
-    function updateYearSelectorsUI() {
-        document.querySelectorAll('#year-selector button').forEach(b => b.className = 'year-btn');
-        const btn = document.getElementById(`btn-${currentYear}`);
-        if (btn) btn.className = 'year-btn active';
-    }
-
-    function changeMonth(m) {
-        if (currentMonth === m) return;
-        currentMonth = m;
-        renderMonthSelectors();
-        if (rawSheetData.length > 0) { closeDeepDiveModal(); calculateAndRenderUI(); handleSearch(); }
-    }
-
-    function showLoader(show) {
-        const loader = document.getElementById('loader');
-        const grid = document.getElementById('wilayah-grid');
-        const comp = document.getElementById('comparison-graph-section');
-        if (show) {
-            closeDeepDiveModal();
-            loader.classList.remove('hidden');
-            grid.classList.add('hidden');
-            comp.classList.add('hidden');
-        } else {
-            loader.classList.add('hidden');
-            grid.classList.remove('hidden');
+            updateTimestamp();
+            renderMonthSelectors();
+            renderSummaryCards(); 
+            if (rawSheetData.length > 0) {
+                calculateAndRenderUI();
+                handleSearch(); 
+            }
         }
-    }
 
-    window.onload = initApp;
-</script>
+        function updateTimestamp() {
+            const now = new Date();
+            const fullText = `${getText('status_as_of')} ${now.toLocaleString()}`;
+            document.getElementById('live-timestamp-footer').innerText = fullText;
+            document.getElementById('print-timestamp').innerText = fullText;
+        }
+
+        document.getElementById('deep-dive-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeepDiveModal();
+        });
+
+        function initApp() {
+            currentYear = actualCalendarYear;
+            document.getElementById('footer-year').innerText = currentYear;
+            
+            if (!['2023', '2024', '2025', '2026'].includes(currentYear)) currentYear = '2026';
+            currentMonth = actualCurrentMonth; 
+            
+            updateTimestamp();
+            updateYearSelectorsUI();
+            renderMonthSelectors();
+            loadSheetFeed();
+            loadSummaryStats(); 
+        }
+
+        function renderMonthSelectors() {
+            const track = document.getElementById('month-track');
+            track.innerHTML = '';
+            const dropdown = document.getElementById('month-dropdown');
+            dropdown.innerHTML = '';
+
+            viewOptions.forEach(optVal => {
+                const isActive = optVal === currentMonth;
+                const isFullYear = optVal === 'FULL YEAR';
+                
+                const btn = document.createElement('button');
+                const extraClasses = isFullYear ? 'col-span-3 bg-slate-800 text-white hover:bg-slate-700 mt-2' : '';
+                
+                btn.className = `px-2 py-2 text-xs font-bold rounded-xl transition-all duration-200 text-center w-full print-break-avoid ${extraClasses} ${
+                    isActive && !isFullYear ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 
+                    (isActive && isFullYear ? 'bg-blue-600 text-white shadow-md' : 
+                    (!extraClasses ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : ''))
+                }`;
+                btn.innerText = isFullYear ? getText('full_year') : optVal;
+                btn.onclick = () => changeMonth(optVal);
+                track.appendChild(btn);
+
+                const opt = document.createElement('option');
+                opt.value = optVal;
+                opt.innerText = isFullYear ? `${getText('full_year_lbl')} (${currentYear})` : `${optVal} ${currentYear}`;
+                if(isActive) opt.selected = true;
+                dropdown.appendChild(opt);
+            });
+        }
+
+        function parseCsvToArray(text) {
+            const lines = text.split('\n');
+            if (lines.length < 2) return [];
+            let data = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const columns = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+                if (columns.length < 5 || !columns[0]) continue;
+                
+                // NEW: Added PR PIC (col 4) and AUDIT (col 5)
+                const rowObj = { 
+                    wilayah: columns[0], 
+                    daerah: columns[1], 
+                    gereja: columns[2], 
+                    type: columns[3], 
+                    prPic: columns[4] || '-',
+                    audit: columns[5] || '-',
+                    months: {} 
+                };
+                
+                // NEW: Shifted the month parsing from 4 to 6 to account for the new columns
+                months.forEach((m, idx) => {
+                    const statusText = columns[6 + idx] ? columns[6 + idx].toLowerCase() : '';
+                    rowObj.months[m] = statusText.includes('submit') ? 'Submitted' : 'Pending';
+                });
+                data.push(rowObj);
+            }
+            return data;
+        }
+
+        async function loadSummaryStats() {
+            try {
+                const [prevRes, currRes] = await Promise.all([
+                    fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${actualPreviousYear}`),
+                    fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${actualCalendarYear}`)
+                ]);
+                
+                const prevData = parseCsvToArray(await prevRes.text());
+                const currData = parseCsvToArray(await currRes.text());
+
+                let prevTotal = 0; let prevPending = 0;
+                prevData.forEach(c => {
+                    months.forEach(m => {
+                        prevTotal++;
+                        if(c.months[m] !== 'Submitted') prevPending++;
+                    });
+                });
+                const prevYearPendingPercent = prevTotal > 0 ? Math.round((prevPending / prevTotal) * 100) : 0;
+
+                let currTotal = 0; let currPending = 0;
+                currData.forEach(c => {
+                    currTotal++;
+                    if(c.months[actualCurrentMonth] !== 'Submitted') currPending++;
+                });
+                const currMonthPendingPercent = currTotal > 0 ? Math.round((currPending / currTotal) * 100) : 0;
+
+                const wStats = {};
+                currData.forEach(c => {
+                    if(!wStats[c.wilayah]) wStats[c.wilayah] = { t:0, s:0 };
+                    wStats[c.wilayah].t++;
+                    if(c.months[actualCurrentMonth] === 'Submitted') wStats[c.wilayah].s++;
+                });
+                let bestW = '-'; let bestP = -1;
+                Object.keys(wStats).forEach(w => {
+                    const p = Math.round((wStats[w].s / wStats[w].t) * 100);
+                    if(p > bestP) { bestP = p; bestW = w; }
+                });
+
+                summaryMetrics = { prevYearPendingPercent, currMonthPendingPercent, bestW, bestP };
+                renderSummaryCards();
+
+            } catch (error) {
+                console.error("Could not load executive summary background stats.");
+                document.getElementById('summary-cards-container').innerHTML = `<p class="text-xs font-bold text-red-500">Analysis unavailable</p>`;
+            }
+        }
+
+        function renderSummaryCards() {
+            if (!summaryMetrics) return;
+            const { prevYearPendingPercent, currMonthPendingPercent, bestW, bestP } = summaryMetrics;
+            
+            document.getElementById('summary-cards-container').innerHTML = `
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">${getText('sum_prev_title')}</span>
+                    <span class="text-2xl font-black ${prevYearPendingPercent > 0 ? 'text-rose-600' : 'text-emerald-600'}">${prevYearPendingPercent}%</span>
+                    <span class="text-[10px] text-slate-500 font-medium">${getText('sum_prev_sub')}</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">${getText('sum_curr_title')}</span>
+                    <span class="text-2xl font-black ${currMonthPendingPercent > 0 ? 'text-rose-600' : 'text-emerald-600'}">${currMonthPendingPercent}%</span>
+                    <span class="text-[10px] text-slate-500 font-medium">${getText('sum_curr_sub')}</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">${getText('sum_top_title')}</span>
+                    <span class="text-2xl font-black text-emerald-600">W${bestW}</span>
+                    <span class="text-[10px] text-slate-500 font-medium">${bestP}% ${getText('sum_top_sub')}</span>
+                </div>
+            `;
+        }
+
+        async function loadSheetFeed() {
+            showLoader(true);
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${currentYear}`;
+            try {
+                const response = await fetch(csvUrl);
+                if (!response.ok) throw new Error('Network error');
+                rawSheetData = parseCsvToArray(await response.text());
+                updateTimestamp();
+                calculateAndRenderUI();
+            } catch (error) {
+                document.getElementById('loader').innerHTML = `<p class="text-xs font-bold text-red-500">Failed to sync live data feed.</p>`;
+            }
+        }
+
+        function calculateAndRenderUI() {
+            showLoader(false);
+            const viewText = currentMonth === 'FULL YEAR' ? getText('annual_view') : currentMonth;
+            document.getElementById('dashboard-title').innerText = `${getText('dashTitle')} (${viewText} ${currentYear})`;
+            
+            const wilayahMap = {};
+            let totalChurches = 0; let totalSubmitted = 0;
+
+            rawSheetData.forEach(item => {
+                const w = item.wilayah;
+                if (!w) return;
+                if (!wilayahMap[w]) wilayahMap[w] = { total: 0, submitted: 0, data: [] };
+
+                if (currentMonth === 'FULL YEAR') {
+                    wilayahMap[w].total += 12; totalChurches += 12;
+                    months.forEach(m => { if (item.months[m] === 'Submitted') { wilayahMap[w].submitted++; totalSubmitted++; }});
+                } else {
+                    wilayahMap[w].total++; totalChurches++;
+                    if ((item.months[currentMonth] || 'Pending') === 'Submitted') { wilayahMap[w].submitted++; totalSubmitted++; }
+                }
+                wilayahMap[w].data.push(item);
+            });
+
+            document.getElementById('global-percentage').innerText = `${totalChurches > 0 ? Math.round((totalSubmitted / totalChurches) * 100) : 0}%`;
+
+            const gridContainer = document.getElementById('wilayah-grid');
+            const graphContainer = document.getElementById('comparison-bars-container');
+            gridContainer.innerHTML = ''; graphContainer.innerHTML = '';
+            document.getElementById('comparison-graph-section').classList.remove('hidden');
+
+            Object.keys(wilayahMap).sort((a,b) => a.localeCompare(b, undefined, {numeric: true})).forEach(w => {
+                const stats = wilayahMap[w];
+                const percent = stats.total > 0 ? Math.round((stats.submitted / stats.total) * 100) : 0;
+                const pendingCount = stats.total - stats.submitted;
+                
+                const barFillClass = 'bg-emerald-500';
+                const ringFillClass = 'stroke-emerald-500';
+                const remainBarClass = percent === 100 ? 'bg-slate-100' : 'bg-rose-500';
+                const remainRingClass = percent === 100 ? 'text-slate-100' : 'text-rose-500';
+
+                const card = document.createElement('div');
+                card.className = `relative bg-white p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center text-center gap-3 hover:shadow-md cursor-pointer print-shadow-none print-break-avoid ${selectedWilayah === w ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/10' : 'border-slate-100 shadow-sm hover:border-slate-300'}`;
+                
+                const alertBadge = pendingCount > 0 ? `<div class="absolute -top-2.5 -right-2.5 bg-rose-500 text-white text-[11px] font-extrabold min-w-[24px] h-6 px-1 flex items-center justify-center rounded-full shadow-md border-2 border-white z-10 print-hide">${pendingCount}</div>` : '';
+
+                card.innerHTML = `
+                    ${alertBadge}
+                    <span class="text-xs font-bold text-slate-700">Wilayah ${w}</span>
+                    <div class="relative w-16 h-16 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="${remainRingClass} transition-colors duration-300" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="${ringFillClass} transition-all duration-500" stroke-dasharray="${percent}, 100" stroke-width="3" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute text-center"><span class="text-xs font-bold text-slate-900">${percent}%</span></div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${stats.submitted}/${stats.total} ${getText('received')}</span>
+                        ${percent === 100 ? `<span class="text-[9px] font-bold text-emerald-600 mt-0.5">${getText('all_in')}</span>` : ''}
+                    </div>
+                `;
+                card.onclick = () => { selectedWilayah = w; calculateAndRenderUI(); renderDeepDive(w, stats); openDeepDiveModal(); };
+                gridContainer.appendChild(card);
+
+                const barRow = document.createElement('div');
+                barRow.className = 'flex items-center gap-3 print-break-avoid';
+                barRow.innerHTML = `
+                    <span class="text-[11px] font-bold text-slate-600 w-16 shrink-0 text-right whitespace-nowrap">Wilayah ${w}</span>
+                    <div class="w-full ${remainBarClass} rounded-full h-3.5 overflow-hidden relative shadow-inner transition-colors duration-300">
+                        <div class="${barFillClass} h-full rounded-full transition-all duration-1000 ease-out" style="width: ${percent}%"></div>
+                    </div>
+                    <span class="text-[11px] font-bold text-slate-800 w-10 shrink-0">${percent}%</span>
+                `;
+                graphContainer.appendChild(barRow);
+            });
+        }
+
+        function clearSearch() { document.getElementById('search-input').value = ''; handleSearch(); }
+        
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const stdDash = document.getElementById('standard-dashboard');
+            const srcDash = document.getElementById('search-results-section');
+            const container = document.getElementById('search-results-container');
+
+            if (!query) { stdDash.classList.remove('hidden'); srcDash.classList.add('hidden'); return; }
+
+            stdDash.classList.add('hidden'); srcDash.classList.remove('hidden'); container.innerHTML = '';
+            const results = rawSheetData.filter(c => c.gereja.toLowerCase().includes(query) || c.daerah.toLowerCase().includes(query) || c.wilayah.toLowerCase().includes(query) || c.prPic.toLowerCase().includes(query));
+
+            if (results.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-sm font-medium">No churches found matching "${query}"</div>`;
+                return;
+            }
+
+            results.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-2 w-full print-break-avoid';
+                card.innerHTML = buildChurchCardHtml(c, true);
+                container.appendChild(card);
+            });
+        }
+
+        function buildChurchCardHtml(c, showLocationTags = false) {
+            let statusDisplay = '';
+            if (currentMonth === 'FULL YEAR') {
+                let gridHtml = '';
+                months.forEach(m => {
+                    const isSub = c.months[m] === 'Submitted';
+                    gridHtml += `<div class="flex flex-col items-center justify-center py-1 rounded border ${isSub ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'}"><span class="text-[8px] uppercase font-bold opacity-70">${m}</span><span class="text-[10px] md:text-xs">${isSub ? '✓' : '✗'}</span></div>`;
+                });
+                statusDisplay = `<div class="grid grid-cols-6 lg:grid-cols-12 gap-1 w-full mt-1 border-t border-slate-100 pt-2">${gridHtml}</div>`;
+            } else {
+                const isSub = (c.months[currentMonth] || 'Pending') === 'Submitted';
+                statusDisplay = `<div class="shrink-0"><span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded-lg ${isSub ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-rose-50 text-rose-700 border border-rose-200/50'}">${isSub ? `🟢 ${getText('submitted')}` : `🔴 ${getText('pending')}`}</span></div>`;
+            }
+
+            const extraTags = showLocationTags ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-white tracking-wider">W${c.wilayah}</span><span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 tracking-wider">${c.daerah}</span>` : '';
+            const viewLabel = currentMonth !== 'FULL YEAR' ? currentMonth : getText('annual_audit');
+            
+            // NEW: Render the new PR PIC and Audit tags
+            const prBadge = c.prPic && c.prPic !== '-' ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 border border-purple-100 tracking-wider truncate max-w-[90px]" title="${c.prPic}">👤 ${c.prPic}</span>` : '';
+            const auditBadge = c.audit && c.audit !== '-' ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded ${c.audit.toLowerCase().includes('done') ? 'bg-teal-50 text-teal-600 border border-teal-100' : 'bg-orange-50 text-orange-600 border border-orange-100'} tracking-wider truncate max-w-[90px]" title="${c.audit}">📋 ${c.audit}</span>` : '';
+
+            return `
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex flex-col gap-0.5 min-w-0">
+                        <span class="text-xs font-bold text-slate-800 truncate leading-tight">${c.gereja}</span>
+                        <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                            ${extraTags}
+                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 tracking-wider">${c.type}</span>
+                            ${prBadge}
+                            ${auditBadge}
+                            ${!showLocationTags ? `<span class="text-[10px] text-slate-400 font-medium">${viewLabel}</span>` : ''}
+                        </div>
+                    </div>
+                    ${currentMonth !== 'FULL YEAR' ? statusDisplay : ''}
+                </div>
+                ${currentMonth === 'FULL YEAR' ? statusDisplay : ''}
+            `;
+        }
+
+        function openDeepDiveModal() {
+            const modal = document.getElementById('deep-dive-modal');
+            const content = document.getElementById('deep-dive-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDeepDiveModal() {
+            const modal = document.getElementById('deep-dive-modal');
+            const content = document.getElementById('deep-dive-content');
+            modal.classList.add('opacity-0'); content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); selectedWilayah = null; calculateAndRenderUI(); }, 300); 
+            document.body.style.overflow = '';
+        }
+
+        function renderDeepDive(wilayahName, stats) {
+            const cardsContainer = document.getElementById('church-cards-container');
+            const viewText = currentMonth === 'FULL YEAR' ? getText('annual_view') : currentMonth;
+            
+            document.getElementById('deep-dive-title').innerText = `Wilayah ${wilayahName} - ${viewText}`;
+            cardsContainer.innerHTML = '';
+
+            const daerahGroup = {};
+            stats.data.forEach(church => {
+                if (!daerahGroup[church.daerah]) daerahGroup[church.daerah] = [];
+                daerahGroup[church.daerah].push(church);
+            });
+
+            Object.keys(daerahGroup).sort().forEach(daerahName => {
+                const list = daerahGroup[daerahName];
+                
+                list.sort((a, b) => {
+                    if (currentMonth === 'FULL YEAR') {
+                        const pA = months.filter(m => a.months[m] !== 'Submitted').length;
+                        const pB = months.filter(m => b.months[m] !== 'Submitted').length;
+                        if (pA > 0 && pB === 0) return -1;
+                        if (pA === 0 && pB > 0) return 1;
+                        return a.gereja.localeCompare(b.gereja);
+                    } else {
+                        const sA = a.months[currentMonth] === 'Submitted' ? 1 : 0;
+                        const sB = b.months[currentMonth] === 'Submitted' ? 1 : 0;
+                        if (sA < sB) return -1; if (sA > sB) return 1;
+                        return a.gereja.localeCompare(b.gereja);
+                    }
+                });
+
+                let doneCount = 0; let totalCount = 0;
+                if (currentMonth === 'FULL YEAR') {
+                    list.forEach(c => { totalCount += 12; months.forEach(m => { if(c.months[m] === 'Submitted') doneCount++; }); });
+                } else {
+                    totalCount = list.length;
+                    doneCount = list.filter(c => c.months[currentMonth] === 'Submitted').length;
+                }
+                const daerahPercent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+
+                const daerahBlock = document.createElement('div');
+                daerahBlock.className = 'flex flex-col gap-2 bg-slate-200/40 p-3 rounded-2xl border border-slate-200/60 h-fit print-break-avoid print-shadow-none print:bg-white print:border-slate-300';
+                const sanitizedId = daerahName.replace(/[^a-zA-Z0-9]/g, '-');
+
+                daerahBlock.innerHTML = `
+                    <div class="flex justify-between items-center px-1 border-b border-slate-300/50 pb-2 mb-1">
+                        <span class="text-xs font-bold text-slate-800 tracking-wide">📂 DAERAH: ${daerahName}</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${daerahPercent === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-300 text-slate-800'}">${daerahPercent}%</span>
+                    </div>
+                    <div class="flex flex-col gap-2" id="cards-list-${sanitizedId}"></div>
+                `;
+                cardsContainer.appendChild(daerahBlock);
+
+                const listTarget = document.getElementById(`cards-list-${sanitizedId}`);
+                list.forEach(c => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col gap-2 w-full print-break-avoid print-shadow-none print:border-slate-200';
+                    card.innerHTML = buildChurchCardHtml(c);
+                    listTarget.appendChild(card);
+                });
+            });
+        }
+
+        function changeYear(year) {
+            if (currentYear === year) return;
+            currentYear = year;
+            updateYearSelectorsUI();
+            renderMonthSelectors(); 
+            loadSheetFeed();
+        }
+
+        function updateYearSelectorsUI() {
+            document.querySelectorAll('#year-selector button').forEach(b => {
+                b.className = 'py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800';
+            });
+            document.getElementById(`btn-${currentYear}`).className = 'py-1.5 text-xs font-bold rounded-lg transition-all duration-200 bg-white text-slate-800 shadow-sm';
+        }
+
+        function changeMonth(m) {
+            if (currentMonth === m) return;
+            currentMonth = m;
+            renderMonthSelectors(); 
+            if (rawSheetData.length > 0) {
+                closeDeepDiveModal(); 
+                calculateAndRenderUI();
+                handleSearch();
+            }
+        }
+
+        function showLoader(show) {
+            if (show) {
+                closeDeepDiveModal();
+                document.getElementById('loader').classList.remove('hidden');
+                document.getElementById('wilayah-grid').classList.add('hidden');
+                document.getElementById('comparison-graph-section').classList.add('hidden');
+            } else {
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('wilayah-grid').classList.remove('hidden');
+                document.getElementById('comparison-graph-section').classList.remove('hidden');
+            }
+        }
+
+        window.onload = initApp;
+    </script>
 </body>
 </html>
