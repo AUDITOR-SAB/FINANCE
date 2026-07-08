@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SAB Mission — TNO Report Status</title>
+<title>SAB Mission — TNO Status</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
@@ -321,7 +321,7 @@ footer{text-align:center;padding:16px;font-size:11px;font-weight:600;color:var(-
        onerror="this.style.display='none';document.getElementById('loader-lf').style.display='flex'">
   <div id="loader-lf" class="loader-logo-fallback">SDA</div>
   <div id="loader-ring"></div>
-  <div id="loader-title">TNO Report Dashboard</div>
+  <div id="loader-title">TNO Status Dashboard</div>
   <div id="loader-sub">Loading submission data from Google Sheets…</div>
   <div id="loader-bar"><div id="loader-bar-fill"></div></div>
   <div id="loader-dots"><span></span><span></span><span></span></div>
@@ -336,7 +336,7 @@ footer{text-align:center;padding:16px;font-size:11px;font-weight:600;color:var(-
       <div id="lf" class="logo-fallback" style="display:none">SDA</div>
       <div style="display:flex;flex-direction:column;gap:1px">
         <span class="logo-name">SAB Mission</span>
-        <span class="logo-tagline">TNO Report Status</span>
+        <span class="logo-tagline">TNO Status</span>
       </div>
     </a>
     <div class="hdr-mid" id="yrSel"></div>
@@ -429,7 +429,7 @@ const PAL = ['#3b82f6','#10b981','#f0b429','#ef4444','#8b5cf6','#ec4899','#22d3e
 
 let currentYear = '', currentMonth = '', rawSheetData = [];
 let selectedWilayah = null, currentLanguage = 'en';
-let validYearsArray = [], summaryMetrics = null;
+let summaryMetrics = null;
 let selDaerah = 'ALL', selType = 'ALL', selPic = 'ALL', selAudit = 'ALL';
 const actualCalendarYear = new Date().getFullYear().toString();
 const actualPreviousYear = (new Date().getFullYear() - 1).toString();
@@ -503,19 +503,13 @@ function changeLang(l){
 
 // ── Init ──
 async function init(){
-  setupYrs();
   currentYear=actualCalendarYear;currentMonth=actualCurrentMonth;
-  if(!validYearsArray.includes(currentYear))currentYear=validYearsArray.length>0?validYearsArray[validYearsArray.length-1]:'2026';
-  renderYrSel();renderAll();
-}
-
-function setupYrs(){
-  validYearsArray=[];
-  document.querySelectorAll('#yrSel button').forEach(b=>{const v=b.innerText.trim();if(v)validYearsArray.push(v)});
+  if(!['2023','2024','2025','2026'].includes(currentYear))currentYear='2026';
+  renderYrSel();loadData();
 }
 
 function renderYrSel(){
-  document.getElementById('yrSel').innerHTML=validYearsArray.map(y=>`<button class="yr-btn${y===currentYear?' on':''}" onclick="changeYear('${y}')">${y}</button>`).join('');
+  document.getElementById('yrSel').innerHTML=['2023','2024','2025','2026'].map(y=>`<button class="yr-btn${y===currentYear?' on':''}" onclick="changeYear('${y}')">${y}</button>`).join('');
 }
 
 function changeYear(y){
@@ -626,7 +620,7 @@ function kpiRow(sm,totalChurches,totalSubmitted,globalPct){
   const c2=sm&&sm.currPct!==null?sm.currPct:null;
   const c3=sm&&sm.subPct!==null?sm.subPct:null;
   return `<div class="kpi-row">
-    ${kpiCard('cb','📋','Total Churches',totalChurches,'Across all wilayah',totalChories>0?100:0)}
+    ${kpiCard('cb','📋','Total Churches',totalChurches,'Across all wilayah',totalChurches>0?100:0)}
     ${kpiCard('cg','✅','Submitted',totalSubmitted,globalPct+'% completion',globalPct)}
     ${kpiCard('ca','⏳','Pending',totalChurches-totalSubmitted,(totalChurches>0?Math.round((totalChurches-totalSubmitted)/totalChurches*100):0)+'% of total',totalChurches>0?Math.round((totalChurches-totalSubmitted)/totalChurches*100):0)}
     ${kpiCard('cp','📍','Wilayah',Object.keys(getWilayahMap(applyFilters(rawSheetData))).length,'Active regions',100)}
