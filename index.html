@@ -300,7 +300,7 @@
         function sheetUrl(sn) { const g = SHEET_GIDS[sn] || '0'; return `https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&gid=${g}&t=${Date.now()}`; }
 
         // ── Cached fetch (F1+F5) ──
-        async function fetchSheetCached(sn) { const c = cacheGet(sn); if (c) { logDebug('Cache hit', sn); return c; } logDebug('Cache miss', sn); const r = await fetch(sheetUrl(sn)); if (!r.ok) throw new Error('HTTP ' + r.status); const d = parseCsv(await r.text()); if (d.length > 0) cacheSet(sn, d); return d; }
+        async function fetchSheetCached(sn) { const c = cacheGet(sn); if (c) { logDebug('Cache hit', sn); return c; } logDebug('Cache miss', sn); const r = await fetch(sheetUrl(sn)); if (!r.ok) throw new Error('HTTP ' + r.status); const d = parseCsvToArray(await r.text()); if (d.length > 0) cacheSet(sn, d); return d; }
 
         function logDebug(msg, data) { debugLog.push({ ts: new Date().toISOString(), msg: msg, data: data ? String(data).slice(0, 500) : undefined }); if (debugLog.length > 100) debugLog.shift(); }
         function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden', 'opacity-0'); t.classList.add('opacity-100'); clearTimeout(t._hide); t._hide = setTimeout(() => { t.classList.add('opacity-0'); setTimeout(() => t.classList.add('hidden'), 300); }, 2500); }
