@@ -34,6 +34,29 @@
             body.wilayah-print-mode #wilayah-print-area { display: block !important; padding: 24px; }
             body.wilayah-print-mode .wp-break-avoid { break-inside: avoid; page-break-inside: avoid; }
         }
+
+        /* ── Chat panel styles ── */
+        #ai-chat-panel {
+            box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+        }
+        #chat-messages::-webkit-scrollbar { width: 4px; }
+        #chat-messages::-webkit-scrollbar-track { background: transparent; }
+        #chat-messages::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        #chat-input::placeholder { color: #94a3b8; font-weight: 600; }
+        .chat-msg-bot a { color: #3b82f6; text-decoration: underline; }
+
+        /* ── Debug panel ── */
+        #debug-content::-webkit-scrollbar { width: 6px; }
+        #debug-content::-webkit-scrollbar-track { background: #1e293b; }
+        #debug-content::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
+
+        /* ── Refresh spinner ── */
+        @keyframes spin-slow { to { transform: rotate(360deg); } }
+        .animate-spin-slow { animation: spin-slow 1s linear infinite; }
+
+        /* ── Toast ── */
+        #toast { transition: opacity 0.3s ease, transform 0.3s ease; }
+        #toast.hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col selection:bg-blue-500 selection:text-white print:bg-white">
@@ -59,11 +82,24 @@
                 </div>
                 <img src="SDA-LOGO.png" alt="SDA Logo" class="h-10 md:h-12 w-auto object-contain order-2 md:order-1 shrink-0">
             </div>
-            <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
                 <div class="flex bg-slate-100 rounded-lg p-0.5 border border-slate-200">
                     <button onclick="changeLang('en')" id="lang-en" class="px-3 py-1 text-xs font-bold rounded-md bg-white text-blue-700 transition shadow-sm border border-slate-200/50">EN</button>
                     <button onclick="changeLang('bm')" id="lang-bm" class="px-3 py-1 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800 transition">BM</button>
                 </div>
+
+                <!-- NEW: Refresh button -->
+                <button onclick="refreshData()" id="refresh-btn" class="flex items-center gap-1.5 bg-slate-600 hover:bg-slate-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm disabled:opacity-60 disabled:cursor-wait">
+                    <svg id="refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span class="hidden sm:inline" data-lang="refreshBtn">Refresh</span>
+                </button>
+
+                <!-- NEW: Debug button -->
+                <button onclick="openDebugPanel()" class="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="hidden sm:inline">Debug</span>
+                </button>
+
                 <button onclick="window.print()" class="hidden md:flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                     <span data-lang="printBtn">Print Report</span>
@@ -153,7 +189,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-                <input type="text" id="search-input" onkeyup="handleSearch()" class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-medium shadow-sm transition" placeholder="Search Church / Daerah..." data-placeholder="searchPlaceholder">
+                <input type="text" id="search-input" onkeyup="triggerSearch()" class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-medium shadow-sm transition" placeholder="Search Church / Daerah..." data-placeholder="searchPlaceholder">
             </div>
 
             <section id="search-results-section" class="hidden flex flex-col gap-3">
@@ -216,7 +252,6 @@
             <div class="bg-slate-800 text-white px-5 py-4 flex justify-between items-center shrink-0 shadow-md z-10">
                 <h3 class="text-sm md:text-base font-bold uppercase tracking-widest" id="deep-dive-title">Deep-Dive Status</h3>
                 <div class="flex items-center gap-2">
-                    <!-- NEW: Print button inside modal -->
                     <button onclick="printWilayahReport()" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                         <span data-lang="printBtn">Print Report</span>
@@ -232,7 +267,62 @@
         </div>
     </div>
 
+    <!-- ═══ TOAST NOTIFICATION ═══ -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] bg-slate-900 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg hidden opacity-0 transition-all duration-300 print-hide"></div>
+
+    <!-- ═══ DEBUG MODAL ═══ -->
+    <div id="debug-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300 print-hide">
+        <div class="bg-slate-50 w-full max-w-5xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="debug-modal-content">
+            <div class="bg-slate-800 text-white px-5 py-4 flex justify-between items-center shrink-0 shadow-md z-10">
+                <h3 class="text-sm font-bold uppercase tracking-widest">Debug Panel</h3>
+                <div class="flex items-center gap-2">
+                    <button onclick="copyDebugReport()" class="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        <span>Copy Report</span>
+                    </button>
+                    <button onclick="closeDebugPanel()" class="text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-600 rounded-full w-8 h-8 flex items-center justify-center transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-y-auto modal-scroll p-4 md:p-6 flex-grow bg-slate-900">
+                <pre id="debug-content" class="text-xs font-mono text-green-400 overflow-x-auto whitespace-pre-wrap leading-relaxed"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ AI CHAT ═══ -->
+    <div id="ai-chat-wrapper" class="fixed bottom-6 right-6 z-50 print-hide flex flex-col items-end">
+        <!-- Chat panel -->
+        <div id="ai-chat-panel" class="hidden mb-3 w-80 sm:w-96 bg-white rounded-2xl border border-slate-200 flex flex-col overflow-hidden transition-all duration-200" style="max-height: 480px; height: 480px;">
+            <!-- Header -->
+            <div class="bg-blue-600 text-white px-4 py-3 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span class="text-sm font-bold">Data Assistant</span>
+                </div>
+                <button onclick="toggleChat()" class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full w-7 h-7 flex items-center justify-center transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <!-- Messages -->
+            <div id="chat-messages" class="flex-grow overflow-y-auto p-4 flex flex-col gap-3 bg-slate-50/50"></div>
+            <!-- Input -->
+            <div class="shrink-0 border-t border-slate-200 bg-white p-3 flex gap-2">
+                <input id="chat-input" type="text" placeholder="Ask about the data..." onkeydown="if(event.key==='Enter') sendChatMessage()" class="flex-grow bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+                <button onclick="sendChatMessage()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-3 py-2 text-xs font-bold transition shadow-sm flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19V5m0 0l-7 7m7-7l7 7"></path></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Bubble button -->
+        <button id="ai-chat-bubble" onclick="toggleChat()" class="w-14 h-14 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 border-2 border-white/20">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        </button>
+    </div>
+
     <script>
+        // ── Configuration ──────────────────────────────────────────────────────────
         const SPREADSHEET_BASE_ID = '1x3GOISJ6VrvytCil-l_INYRK0HU_s_vf6U1Y2Lpzd8A';
         const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
         const viewOptions = [...months, 'FULL YEAR'];
@@ -250,13 +340,81 @@
         const actualCurrentMonth = months[new Date().getMonth()];
         let summaryMetrics = null;
 
-        // Tracks the current wilayah data for printing
         let currentDeepDiveWilayah = null;
         let currentDeepDiveStats = null;
 
         let selDaerah = 'ALL', selType = 'ALL', selPic = 'ALL', selAudit = 'ALL';
 
-        // ── Helpers ──────────────────────────────────────────────────────────────
+        // ── Debug log ──────────────────────────────────────────────────────────────
+        const debugLog = [];
+        function logDebug(msg, data) {
+            debugLog.push({ ts: new Date().toISOString(), msg: msg, data: data ? String(data).slice(0, 500) : undefined });
+            if (debugLog.length > 100) debugLog.shift();
+        }
+
+        // ── Toast helper ───────────────────────────────────────────────────────────
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.remove('hidden', 'opacity-0');
+            t.classList.add('opacity-100');
+            clearTimeout(t._hide);
+            t._hide = setTimeout(() => {
+                t.classList.add('opacity-0');
+                t.classList.add('hidden');
+            }, 2500);
+        }
+
+        // ── Cache helpers (F1) ─────────────────────────────────────────────────────
+        const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+        function cacheGet(sheetName) {
+            try {
+                const raw = sessionStorage.getItem('tnocache_' + sheetName);
+                if (!raw) return null;
+                const item = JSON.parse(raw);
+                if (Date.now() - item.ts > CACHE_TTL) {
+                    sessionStorage.removeItem('tnocache_' + sheetName);
+                    return null;
+                }
+                return item.data;
+            } catch (e) { return null; }
+        }
+        function cacheSet(sheetName, data) {
+            try {
+                sessionStorage.setItem('tnocache_' + sheetName, JSON.stringify({ ts: Date.now(), data: data }));
+            } catch (e) { /* storage full, ignore */ }
+        }
+        function cacheClear() {
+            const keys = [];
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const k = sessionStorage.key(i);
+                if (k && k.startsWith('tnocache_')) keys.push(k);
+            }
+            keys.forEach(k => sessionStorage.removeItem(k));
+        }
+
+        // ── Sheet URL helper (F5) ──────────────────────────────────────────────────
+        function sheetUrl(sheetName) {
+            return `https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${sheetName}&t=${Date.now()}`;
+        }
+
+        // ── Cached sheet fetch (F1+F5) ─────────────────────────────────────────────
+        async function fetchSheetCached(sheetName) {
+            const cached = cacheGet(sheetName);
+            if (cached) {
+                logDebug('Cache hit', sheetName);
+                return cached;
+            }
+            logDebug('Cache miss, fetching', sheetName);
+            const res = await fetch(sheetUrl(sheetName));
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const text = await res.text();
+            const data = parseCsvToArray(text);
+            if (data.length > 0) cacheSet(sheetName, data);
+            return data;
+        }
+
+        // ── Helpers ────────────────────────────────────────────────────────────────
         function isSubmittedStatus(s) {
             if (!s) return false;
             const t = s.toLowerCase().trim();
@@ -281,7 +439,7 @@
             document.getElementById('mobile-filter-badge').classList.toggle('hidden', !active);
         }
 
-        // ── Language dictionary ───────────────────────────────────────────────────
+        // ── Language dictionary ────────────────────────────────────────────────────
         const dict = {
             en: {
                 title: 'TNO Report Submission Status',
@@ -297,6 +455,7 @@
                 compTitle: 'Submission Comparison', compSub: 'Wilayah vs. Wilayah',
                 deepTitle: 'Deep-Dive Status',
                 printBtn: 'Print Report',
+                refreshBtn: 'Refresh',
                 fetching: 'Fetching live data from Google Sheets...',
                 status_as_of: 'Status as of:',
                 pending: 'Pending', submitted: 'Submitted', received: 'Received',
@@ -304,12 +463,11 @@
                 full_year_lbl: '📊 Full Year Overview',
                 annual_view: 'Annual View', annual_audit: 'Annual Audit View',
                 summaryTitle: 'Executive Summary',
-                sum_prev_title: `Pending Reports (${actualPreviousYear})`,
+                sum_prev_title: 'Pending (' + actualPreviousYear + ')',
                 sum_prev_sub: 'Of total year expectations',
-                sum_curr_title: `Pending (${actualCurrentMonth} ${actualCalendarYear})`,
+                sum_curr_title: 'Pending (' + actualCurrentMonth + ' ' + actualCalendarYear + ')',
                 sum_curr_sub: 'Churches yet to submit',
-                // NEW card 3
-                sum_sub_title: `Submitted (${actualCurrentMonth} ${actualCalendarYear})`,
+                sum_sub_title: 'Submitted (' + actualCurrentMonth + ' ' + actualCalendarYear + ')',
                 sum_sub_sub: 'Churches submitted this month'
             },
             bm: {
@@ -326,6 +484,7 @@
                 compTitle: 'Perbandingan Penyerahan', compSub: 'Wilayah vs. Wilayah',
                 deepTitle: 'Status Terperinci',
                 printBtn: 'Cetak Laporan',
+                refreshBtn: 'Muat Semula',
                 fetching: 'Mengambil data langsung dari Google Sheets...',
                 status_as_of: 'Status setakat:',
                 pending: 'Tertunggak', submitted: 'Dihantar', received: 'Diterima',
@@ -333,11 +492,11 @@
                 full_year_lbl: '📊 Gambaran Keseluruhan Tahunan',
                 annual_view: 'Paparan Tahunan', annual_audit: 'Paparan Audit Tahunan',
                 summaryTitle: 'Ringkasan Eksekutif',
-                sum_prev_title: `Laporan Tertunggak (${actualPreviousYear})`,
+                sum_prev_title: 'Laporan Tertunggak (' + actualPreviousYear + ')',
                 sum_prev_sub: 'Daripada jangkaan tahunan',
-                sum_curr_title: `Tertunggak (${actualCurrentMonth} ${actualCalendarYear})`,
+                sum_curr_title: 'Tertunggak (' + actualCurrentMonth + ' ' + actualCalendarYear + ')',
                 sum_curr_sub: 'Gereja belum menghantar',
-                sum_sub_title: `Dihantar (${actualCurrentMonth} ${actualCalendarYear})`,
+                sum_sub_title: 'Dihantar (' + actualCurrentMonth + ' ' + actualCalendarYear + ')',
                 sum_sub_sub: 'Gereja telah menghantar bulan ini'
             }
         };
@@ -367,7 +526,7 @@
         }
 
         function updateTimestamp() {
-            const txt = `${getText('status_as_of')} ${new Date().toLocaleString()}`;
+            const txt = getText('status_as_of') + ' ' + new Date().toLocaleString();
             document.getElementById('live-timestamp-footer').innerText = txt;
             document.getElementById('print-timestamp').innerText = txt;
         }
@@ -375,9 +534,19 @@
         document.getElementById('deep-dive-modal').addEventListener('click', function(e) {
             if (e.target === this) closeDeepDiveModal();
         });
+        document.getElementById('debug-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeDebugPanel();
+        });
 
-        // ── Init ─────────────────────────────────────────────────────────────────
-        function initApp() {
+        // ── Search debounce (F3) ───────────────────────────────────────────────────
+        let searchTimeout = null;
+        function triggerSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(handleSearch, 200);
+        }
+
+        // ── Init ───────────────────────────────────────────────────────────────────
+        async function initApp() {
             setupYearSelectionBinding();
             currentYear = actualCalendarYear;
             document.getElementById('footer-year').innerText = currentYear;
@@ -387,8 +556,10 @@
             updateTimestamp();
             updateYearSelectorsUI();
             renderMonthSelectors();
-            loadSheetFeed();
-            loadSummaryStats();
+
+            // Load sheet data first, then summary (F2 — avoids duplicate fetch)
+            await loadSheetFeed();
+            await loadSummaryStats();
         }
 
         function renderMonthSelectors() {
@@ -400,16 +571,16 @@
                 const isFullYear = optVal === 'FULL YEAR';
                 const btn = document.createElement('button');
                 const extra = isFullYear ? 'col-span-3 bg-slate-800 text-white hover:bg-slate-700 mt-2' : '';
-                btn.className = `px-2 py-2 text-xs font-bold rounded-xl transition-all duration-200 text-center w-full ${extra} ${
-                    isActive && !isFullYear ? 'bg-blue-600 text-white shadow-md shadow-blue-100' :
+                btn.className = 'px-2 py-2 text-xs font-bold rounded-xl transition-all duration-200 text-center w-full ' + extra + ' ' +
+                    (isActive && !isFullYear ? 'bg-blue-600 text-white shadow-md shadow-blue-100' :
                     isActive && isFullYear  ? 'bg-blue-600 text-white shadow-md' :
-                    !extra ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : ''}`;
+                    !extra ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : '');
                 btn.innerText = isFullYear ? getText('full_year') : optVal;
                 btn.onclick = () => changeMonth(optVal);
                 track.appendChild(btn);
                 const opt = document.createElement('option');
                 opt.value = optVal;
-                opt.innerText = isFullYear ? `${getText('full_year_lbl')} (${currentYear})` : `${optVal} ${currentYear}`;
+                opt.innerText = isFullYear ? getText('full_year_lbl') + ' (' + currentYear + ')' : optVal + ' ' + currentYear;
                 if (isActive) opt.selected = true;
                 dropdown.appendChild(opt);
             });
@@ -432,6 +603,7 @@
                 });
                 data.push(row);
             }
+            logDebug('Parsed CSV rows', data.length);
             return data;
         }
 
@@ -489,81 +661,130 @@
             return true;
         }
 
-        // ── Summary Stats ─────────────────────────────────────────────────────────
+        // ── Summary Stats (F2 + F6) ──────────────────────────────────────────────
         async function loadSummaryStats() {
             try {
-                const [prevRes, currRes] = await Promise.all([
-                    fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${actualPreviousYear}`),
-                    fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${actualCalendarYear}`)
-                ]);
-                const prevData = parseCsvToArray(await prevRes.text());
-                const currData = parseCsvToArray(await currRes.text());
+                let prevData = null, currData = null;
+
+                try {
+                    prevData = await fetchSheetCached(actualPreviousYear);
+                } catch (e) {
+                    logDebug('Summary: prev year fetch failed', actualPreviousYear + ' ' + e.message);
+                }
+
+                // Reuse rawSheetData if it matches current calendar year (F2)
+                if (currentYear === actualCalendarYear && rawSheetData.length > 0) {
+                    currData = rawSheetData;
+                    logDebug('Summary: reusing rawSheetData for current year');
+                } else {
+                    try {
+                        currData = await fetchSheetCached(actualCalendarYear);
+                    } catch (e) {
+                        logDebug('Summary: curr year fetch failed', actualCalendarYear + ' ' + e.message);
+                    }
+                }
 
                 // Card 1 — previous year pending %
-                let prevTotal = 0, prevPending = 0;
-                prevData.forEach(c => { months.forEach(m => { prevTotal++; if (c.months[m] !== 'Submitted') prevPending++; }); });
-                const prevYearPendingPercent = prevTotal > 0 ? Math.round((prevPending / prevTotal) * 100) : 0;
+                let prevYearPendingPercent = null;
+                if (prevData && prevData.length > 0) {
+                    let pTotal = 0, pPending = 0;
+                    prevData.forEach(c => { months.forEach(m => { pTotal++; if (c.months[m] !== 'Submitted') pPending++; }); });
+                    prevYearPendingPercent = pTotal > 0 ? Math.round((pPending / pTotal) * 100) : 0;
+                }
 
                 // Card 2 — current month pending %
-                let currTotal = 0, currPending = 0;
-                currData.forEach(c => { currTotal++; if (c.months[actualCurrentMonth] !== 'Submitted') currPending++; });
-                const currMonthPendingPercent = currTotal > 0 ? Math.round((currPending / currTotal) * 100) : 0;
-
-                // Card 3 (NEW) — current month submitted count + %
-                const currSubmitted = currTotal - currPending;
-                const currSubmittedPercent = currTotal > 0 ? Math.round((currSubmitted / currTotal) * 100) : 0;
+                let currMonthPendingPercent = null;
+                let currSubmitted = 0, currTotal = 0, currSubmittedPercent = null;
+                if (currData && currData.length > 0) {
+                    currTotal = currData.length;
+                    let cpending = 0;
+                    currData.forEach(c => { if (c.months[actualCurrentMonth] !== 'Submitted') cpending++; });
+                    currMonthPendingPercent = currTotal > 0 ? Math.round((cpending / currTotal) * 100) : 0;
+                    currSubmitted = currTotal - cpending;
+                    currSubmittedPercent = currTotal > 0 ? Math.round((currSubmitted / currTotal) * 100) : 0;
+                }
 
                 summaryMetrics = { prevYearPendingPercent, currMonthPendingPercent, currSubmitted, currTotal, currSubmittedPercent };
                 renderSummaryCards();
             } catch (e) {
-                console.error('Summary stats error', e);
-                document.getElementById('summary-cards-container').innerHTML =
-                    `<p class="text-xs font-bold text-red-500 col-span-3 text-center py-4">Executive analytics overview currently unavailable.</p>`;
+                logDebug('Summary stats error', e.message);
             }
         }
 
         function renderSummaryCards() {
-            if (!summaryMetrics) return;
+            const container = document.getElementById('summary-cards-container');
+            if (!summaryMetrics) {
+                container.innerHTML =
+                    '<p class="text-xs font-bold text-red-500 col-span-3 text-center py-4">Executive analytics overview currently unavailable.</p>';
+                return;
+            }
             const { prevYearPendingPercent, currMonthPendingPercent, currSubmitted, currTotal, currSubmittedPercent } = summaryMetrics;
-            document.getElementById('summary-cards-container').innerHTML = `
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">${getText('sum_prev_title')}</span>
-                    <span class="text-2xl font-black ${prevYearPendingPercent > 0 ? 'text-rose-600' : 'text-emerald-600'}">${prevYearPendingPercent}%</span>
-                    <span class="text-[10px] text-slate-500 font-medium">${getText('sum_prev_sub')}</span>
-                </div>
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">${getText('sum_curr_title')}</span>
-                    <span class="text-2xl font-black ${currMonthPendingPercent > 0 ? 'text-rose-600' : 'text-emerald-600'}">${currMonthPendingPercent}%</span>
-                    <span class="text-[10px] text-slate-500 font-medium">${getText('sum_curr_sub')}</span>
-                </div>
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">${getText('sum_sub_title')}</span>
-                    <span class="text-2xl font-black text-emerald-600">${currSubmittedPercent}%</span>
-                    <span class="text-[10px] text-slate-500 font-medium">${currSubmitted} / ${currTotal} · ${getText('sum_sub_sub')}</span>
-                </div>
-            `;
+
+            // Card 1 — previous year
+            let card1;
+            if (prevYearPendingPercent !== null) {
+                card1 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">' +
+                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_prev_title') + '</span>' +
+                    '<span class="text-2xl font-black ' + (prevYearPendingPercent > 0 ? 'text-rose-600' : 'text-emerald-600') + '">' + prevYearPendingPercent + '%</span>' +
+                    '<span class="text-[10px] text-slate-500 font-medium">' + getText('sum_prev_sub') + '</span></div>';
+            } else {
+                card1 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm opacity-60">' +
+                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_prev_title') + '</span>' +
+                    '<span class="text-lg font-black text-slate-400">—</span>' +
+                    '<span class="text-[10px] text-slate-400 font-medium">Data unavailable</span></div>';
+            }
+
+            // Card 2 — current month pending
+            let card2;
+            if (currMonthPendingPercent !== null) {
+                card2 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">' +
+                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_curr_title') + '</span>' +
+                    '<span class="text-2xl font-black ' + (currMonthPendingPercent > 0 ? 'text-rose-600' : 'text-emerald-600') + '">' + currMonthPendingPercent + '%</span>' +
+                    '<span class="text-[10px] text-slate-500 font-medium">' + getText('sum_curr_sub') + '</span></div>';
+            } else {
+                card2 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm opacity-60">' +
+                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_curr_title') + '</span>' +
+                    '<span class="text-lg font-black text-slate-400">—</span>' +
+                    '<span class="text-[10px] text-slate-400 font-medium">Data unavailable</span></div>';
+            }
+
+            // Card 3 — current month submitted
+            let card3;
+            if (currSubmittedPercent !== null) {
+                card3 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">' +
+                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_sub_title') + '</span>' +
+                    '<span class="text-2xl font-black text-emerald-600">' + currSubmittedPercent + '%</span>' +
+                    '<span class="text-[10px] text-slate-500 font-medium">' + currSubmitted + ' / ' + currTotal + ' · ' + getText('sum_sub_sub') + '</span></div>';
+            } else {
+                card3 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm opacity-60">' +
+                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_sub_title') + '</span>' +
+                    '<span class="text-lg font-black text-slate-400">—</span>' +
+                    '<span class="text-[10px] text-slate-400 font-medium">Data unavailable</span></div>';
+            }
+
+            container.innerHTML = card1 + card2 + card3;
         }
 
-        // ── Sheet feed ────────────────────────────────────────────────────────────
+        // ── Sheet feed (F1 + F5) ──────────────────────────────────────────────────
         async function loadSheetFeed() {
             showLoader(true);
-            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${currentYear}`;
             try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error('Network error');
-                rawSheetData = parseCsvToArray(await res.text());
+                rawSheetData = await fetchSheetCached(currentYear);
+                logDebug('Sheet feed loaded', currentYear + ' — ' + rawSheetData.length + ' rows');
                 updateTimestamp();
                 buildFilterDropdowns();
                 calculateAndRenderUI();
             } catch (e) {
-                document.getElementById('loader').innerHTML = `<p class="text-xs font-bold text-red-500">Failed to sync live data feed.</p>`;
+                logDebug('Sheet feed error', e.message);
+                document.getElementById('loader').innerHTML =
+                    '<p class="text-xs font-bold text-red-500">Failed to sync live data feed. ' + e.message + '</p>';
             }
         }
 
         function calculateAndRenderUI() {
             showLoader(false);
             const viewText = currentMonth === 'FULL YEAR' ? getText('annual_view') : currentMonth;
-            document.getElementById('dashboard-title').innerText = `${getText('dashTitle')} (${viewText} ${currentYear})`;
+            document.getElementById('dashboard-title').innerText = getText('dashTitle') + ' (' + viewText + ' ' + currentYear + ')';
 
             const wilayahMap = {};
             let totalChurches = 0, totalSubmitted = 0;
@@ -583,7 +804,7 @@
             });
 
             document.getElementById('global-percentage').innerText =
-                `${totalChurches > 0 ? Math.round((totalSubmitted / totalChurches) * 100) : 0}% Done`;
+                (totalChurches > 0 ? Math.round((totalSubmitted / totalChurches) * 100) : 0) + '% Done';
 
             const grid = document.getElementById('wilayah-grid');
             const graph = document.getElementById('comparison-bars-container');
@@ -591,7 +812,7 @@
             document.getElementById('comparison-graph-section').classList.remove('hidden');
 
             if (Object.keys(wilayahMap).length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-6 text-slate-400 text-xs font-medium">No results match selected filter criteria.</div>`;
+                grid.innerHTML = '<div class="col-span-full text-center py-6 text-slate-400 text-xs font-medium">No results match selected filter criteria.</div>';
                 return;
             }
 
@@ -601,37 +822,37 @@
                 const pending = stats.total - stats.submitted;
 
                 const card = document.createElement('div');
-                card.className = `relative bg-white p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center text-center gap-3 hover:shadow-md cursor-pointer print-shadow-none print-break-avoid ${
-                    selectedWilayah === w ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/10' : 'border-slate-100 shadow-sm hover:border-slate-300'}`;
+                card.className = 'relative bg-white p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center text-center gap-3 hover:shadow-md cursor-pointer print-shadow-none print-break-avoid ' +
+                    (selectedWilayah === w ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/10' : 'border-slate-100 shadow-sm hover:border-slate-300');
 
                 const badge = pending > 0
-                    ? `<div class="absolute -top-2.5 -right-2.5 bg-rose-500 text-white text-[11px] font-extrabold min-w-[24px] h-6 px-1 flex items-center justify-center rounded-full shadow-md border-2 border-white z-10 print-hide">${pending}</div>` : '';
+                    ? '<div class="absolute -top-2.5 -right-2.5 bg-rose-500 text-white text-[11px] font-extrabold min-w-[24px] h-6 px-1 flex items-center justify-center rounded-full shadow-md border-2 border-white z-10 print-hide">' + pending + '</div>' : '';
                 const remainRing = pct === 100 ? 'text-slate-100' : 'text-rose-500';
 
-                card.innerHTML = `${badge}
-                    <span class="text-xs font-bold text-slate-700">Wilayah ${w}</span>
-                    <div class="relative w-16 h-16 flex items-center justify-center">
-                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                            <path class="${remainRing} transition-colors duration-300" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                            <path class="stroke-emerald-500 transition-all duration-500" stroke-dasharray="${pct}, 100" stroke-width="3" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                        </svg>
-                        <div class="absolute"><span class="text-xs font-bold text-slate-900">${pct}%</span></div>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">${stats.submitted}/${stats.total} ${getText('received')}</span>
-                        ${pct === 100 ? `<span class="text-[9px] font-bold text-emerald-600 mt-0.5">${getText('all_in')}</span>` : ''}
-                    </div>`;
+                card.innerHTML = badge +
+                    '<span class="text-xs font-bold text-slate-700">Wilayah ' + w + '</span>' +
+                    '<div class="relative w-16 h-16 flex items-center justify-center">' +
+                        '<svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">' +
+                            '<path class="' + remainRing + ' transition-colors duration-300" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>' +
+                            '<path class="stroke-emerald-500 transition-all duration-500" stroke-dasharray="' + pct + ', 100" stroke-width="3" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>' +
+                        '</svg>' +
+                        '<div class="absolute"><span class="text-xs font-bold text-slate-900">' + pct + '%</span></div>' +
+                    '</div>' +
+                    '<div class="flex flex-col">' +
+                        '<span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">' + stats.submitted + '/' + stats.total + ' ' + getText('received') + '</span>' +
+                        (pct === 100 ? '<span class="text-[9px] font-bold text-emerald-600 mt-0.5">' + getText('all_in') + '</span>' : '') +
+                    '</div>';
                 card.onclick = () => { selectedWilayah = w; calculateAndRenderUI(); renderDeepDive(w, stats); openDeepDiveModal(); };
                 grid.appendChild(card);
 
                 const barRow = document.createElement('div');
                 barRow.className = 'flex items-center gap-3 print-break-avoid';
-                barRow.innerHTML = `
-                    <span class="text-[11px] font-bold text-slate-600 w-16 shrink-0 text-right whitespace-nowrap">Wilayah ${w}</span>
-                    <div class="w-full ${pct === 100 ? 'bg-slate-100' : 'bg-rose-500'} rounded-full h-3.5 overflow-hidden shadow-inner">
-                        <div class="bg-emerald-500 h-full rounded-full transition-all duration-1000 ease-out" style="width:${pct}%"></div>
-                    </div>
-                    <span class="text-[11px] font-bold text-slate-800 w-10 shrink-0">${pct}%</span>`;
+                barRow.innerHTML =
+                    '<span class="text-[11px] font-bold text-slate-600 w-16 shrink-0 text-right whitespace-nowrap">Wilayah ' + w + '</span>' +
+                    '<div class="w-full ' + (pct === 100 ? 'bg-slate-100' : 'bg-rose-500') + ' rounded-full h-3.5 overflow-hidden shadow-inner">' +
+                        '<div class="bg-emerald-500 h-full rounded-full transition-all duration-1000 ease-out" style="width:' + pct + '%"></div>' +
+                    '</div>' +
+                    '<span class="text-[11px] font-bold text-slate-800 w-10 shrink-0">' + pct + '%</span>';
                 graph.appendChild(barRow);
             });
         }
@@ -650,7 +871,7 @@
                 c.gereja.toLowerCase().includes(q) || c.daerah.toLowerCase().includes(q) ||
                 c.wilayah.toLowerCase().includes(q) || c.prPic.toLowerCase().includes(q)));
             if (results.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400 text-sm font-medium">No churches found matching "${q}"</div>`;
+                container.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 text-sm font-medium">No churches found matching "' + q + '"</div>';
                 return;
             }
             results.forEach(c => {
@@ -662,40 +883,39 @@
         }
 
         // ── Church card HTML ──────────────────────────────────────────────────────
-        function buildChurchCardHtml(c, showLocationTags = false) {
+        function buildChurchCardHtml(c, showLocationTags) {
             let statusDisplay = '';
             if (currentMonth === 'FULL YEAR') {
                 let grid = '';
                 months.forEach(m => {
                     const ok = c.months[m] === 'Submitted';
-                    grid += `<div class="flex flex-col items-center justify-center py-1 rounded border ${ok ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'}"><span class="text-[8px] uppercase font-bold opacity-70">${m}</span><span class="text-[10px] md:text-xs">${ok ? '✓' : '✗'}</span></div>`;
+                    grid += '<div class="flex flex-col items-center justify-center py-1 rounded border ' + (ok ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700') + '"><span class="text-[8px] uppercase font-bold opacity-70">' + m + '</span><span class="text-[10px] md:text-xs">' + (ok ? '✓' : '✗') + '</span></div>';
                 });
-                statusDisplay = `<div class="grid grid-cols-6 lg:grid-cols-12 gap-1 w-full mt-1 border-t border-slate-100 pt-2">${grid}</div>`;
+                statusDisplay = '<div class="grid grid-cols-6 lg:grid-cols-12 gap-1 w-full mt-1 border-t border-slate-100 pt-2">' + grid + '</div>';
             } else {
                 const ok = (c.months[currentMonth] || 'Pending') === 'Submitted';
-                statusDisplay = `<div class="shrink-0"><span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded-lg ${ok ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-rose-50 text-rose-700 border border-rose-200/50'}">${ok ? `🟢 ${getText('submitted')}` : `🔴 ${getText('pending')}`}</span></div>`;
+                statusDisplay = '<div class="shrink-0"><span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded-lg ' + (ok ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-rose-50 text-rose-700 border border-rose-200/50') + '">' + (ok ? '🟢 ' + getText('submitted') : '🔴 ' + getText('pending')) + '</span></div>';
             }
             const extraTags = showLocationTags
-                ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-white tracking-wider">W${c.wilayah}</span><span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 tracking-wider">${c.daerah}</span>` : '';
+                ? '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-white tracking-wider">W' + c.wilayah + '</span><span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 tracking-wider">' + c.daerah + '</span>' : '';
             const viewLabel = currentMonth !== 'FULL YEAR' ? currentMonth : getText('annual_audit');
             const prBadge = c.prPic && c.prPic !== '-'
-                ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 border border-purple-100 tracking-wider truncate max-w-[90px]" title="${c.prPic}">👤 ${c.prPic}</span>` : '';
+                ? '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 border border-purple-100 tracking-wider truncate max-w-[90px]" title="' + c.prPic + '">👤 ' + c.prPic + '</span>' : '';
             const auditBadge = c.audit && c.audit !== '-'
-                ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded ${isAuditedStatus(c.audit) ? 'bg-teal-50 text-teal-600 border border-teal-100' : 'bg-orange-50 text-orange-600 border border-orange-100'} tracking-wider truncate max-w-[90px]" title="${c.audit}">📋 ${c.audit}</span>` : '';
-            return `
-                <div class="flex items-center justify-between w-full">
-                    <div class="flex flex-col gap-0.5 min-w-0">
-                        <span class="text-xs font-bold text-slate-800 truncate leading-tight">${c.gereja}</span>
-                        <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                            ${extraTags}
-                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 tracking-wider">${c.type}</span>
-                            ${prBadge}${auditBadge}
-                            ${!showLocationTags ? `<span class="text-[10px] text-slate-400 font-medium">${viewLabel}</span>` : ''}
-                        </div>
-                    </div>
-                    ${currentMonth !== 'FULL YEAR' ? statusDisplay : ''}
-                </div>
-                ${currentMonth === 'FULL YEAR' ? statusDisplay : ''}`;
+                ? '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded ' + (isAuditedStatus(c.audit) ? 'bg-teal-50 text-teal-600 border border-teal-100' : 'bg-orange-50 text-orange-600 border border-orange-100') + ' tracking-wider truncate max-w-[90px]" title="' + c.audit + '">📋 ' + c.audit + '</span>' : '';
+            return '<div class="flex items-center justify-between w-full">' +
+                    '<div class="flex flex-col gap-0.5 min-w-0">' +
+                        '<span class="text-xs font-bold text-slate-800 truncate leading-tight">' + c.gereja + '</span>' +
+                        '<div class="flex items-center gap-1.5 mt-0.5 flex-wrap">' +
+                            extraTags +
+                            '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 tracking-wider">' + c.type + '</span>' +
+                            prBadge + auditBadge +
+                            (!showLocationTags ? '<span class="text-[10px] text-slate-400 font-medium">' + viewLabel + '</span>' : '') +
+                        '</div>' +
+                    '</div>' +
+                    (currentMonth !== 'FULL YEAR' ? statusDisplay : '') +
+                '</div>' +
+                (currentMonth === 'FULL YEAR' ? statusDisplay : '');
         }
 
         // ── Modal open / close ────────────────────────────────────────────────────
@@ -722,7 +942,7 @@
 
             const container = document.getElementById('church-cards-container');
             const viewText  = currentMonth === 'FULL YEAR' ? getText('annual_view') : currentMonth;
-            document.getElementById('deep-dive-title').innerText = `Wilayah ${wilayahName} - ${viewText}`;
+            document.getElementById('deep-dive-title').innerText = 'Wilayah ' + wilayahName + ' - ' + viewText;
             container.innerHTML = '';
 
             const daerahGroup = {};
@@ -755,15 +975,15 @@
 
                 const block = document.createElement('div');
                 block.className = 'flex flex-col gap-2 bg-slate-200/40 p-3 rounded-2xl border border-slate-200/60 h-fit';
-                block.innerHTML = `
-                    <div class="flex justify-between items-center px-1 border-b border-slate-300/50 pb-2 mb-1">
-                        <span class="text-xs font-bold text-slate-800 tracking-wide">📂 DAERAH: ${daerahName}</span>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${dpct === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-300 text-slate-800'}">${dpct}%</span>
-                    </div>
-                    <div class="flex flex-col gap-2" id="cards-list-${sid}"></div>`;
+                block.innerHTML =
+                    '<div class="flex justify-between items-center px-1 border-b border-slate-300/50 pb-2 mb-1">' +
+                        '<span class="text-xs font-bold text-slate-800 tracking-wide">📂 DAERAH: ' + daerahName + '</span>' +
+                        '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ' + (dpct === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-300 text-slate-800') + '">' + dpct + '%</span>' +
+                    '</div>' +
+                    '<div class="flex flex-col gap-2" id="cards-list-' + sid + '"></div>';
                 container.appendChild(block);
 
-                const target = document.getElementById(`cards-list-${sid}`);
+                const target = document.getElementById('cards-list-' + sid);
                 list.forEach(c => {
                     const card = document.createElement('div');
                     card.className = 'bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col gap-2 w-full';
@@ -773,7 +993,11 @@
             });
         }
 
-        // ── NEW: Print Wilayah Full Year Report ───────────────────────────────────
+        // ── Wilayah Print (F4) ────────────────────────────────────────────────────
+        window.addEventListener('afterprint', function() {
+            document.body.classList.remove('wilayah-print-mode');
+        });
+
         function printWilayahReport() {
             if (!currentDeepDiveWilayah || !currentDeepDiveStats) return;
 
@@ -781,11 +1005,10 @@
             const wpTS      = document.getElementById('wp-timestamp');
             const wpContent = document.getElementById('wp-content');
 
-            wpTitle.innerText = `Wilayah ${currentDeepDiveWilayah} — Full Year Report (${currentYear})`;
-            wpTS.innerText    = `${getText('status_as_of')} ${new Date().toLocaleString()}`;
+            wpTitle.innerText = 'Wilayah ' + currentDeepDiveWilayah + ' — Full Year Report (' + currentYear + ')';
+            wpTS.innerText    = getText('status_as_of') + ' ' + new Date().toLocaleString();
             wpContent.innerHTML = '';
 
-            // Build full-year grid per daerah
             const daerahGroup = {};
             currentDeepDiveStats.data.forEach(c => {
                 if (!daerahGroup[c.daerah]) daerahGroup[c.daerah] = [];
@@ -805,41 +1028,37 @@
                 block.className = 'wp-break-avoid mb-6 border border-slate-200 rounded-xl overflow-hidden';
                 block.style.pageBreakInside = 'avoid';
 
-                // Daerah header
                 const hdr = document.createElement('div');
                 hdr.style.cssText = 'background:#1e293b;color:white;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;';
-                hdr.innerHTML = `<span style="font-weight:700;font-size:12px;">📂 DAERAH: ${daerahName}</span><span style="font-size:11px;font-weight:700;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:999px;">${dpct}% Complete</span>`;
+                hdr.innerHTML = '<span style="font-weight:700;font-size:12px;">📂 DAERAH: ' + daerahName + '</span><span style="font-size:11px;font-weight:700;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:999px;">' + dpct + '% Complete</span>';
                 block.appendChild(hdr);
 
-                // Table
                 const table = document.createElement('table');
                 table.style.cssText = 'width:100%;border-collapse:collapse;font-size:10px;';
 
-                // Header row
                 const thead = document.createElement('thead');
                 let thHtml = '<tr style="background:#f8fafc;">';
                 thHtml += '<th style="text-align:left;padding:6px 10px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#475569;">Church</th>';
                 thHtml += '<th style="padding:6px 6px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#475569;">Type</th>';
                 thHtml += '<th style="padding:6px 6px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#475569;">Audit</th>';
                 months.forEach(m => {
-                    thHtml += `<th style="padding:6px 4px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#475569;text-align:center;">${m}</th>`;
+                    thHtml += '<th style="padding:6px 4px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#475569;text-align:center;">' + m + '</th>';
                 });
                 thHtml += '</tr>';
                 thead.innerHTML = thHtml;
                 table.appendChild(thead);
 
-                // Body rows
                 const tbody = document.createElement('tbody');
                 list.forEach((c, idx) => {
                     const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
-                    let rowHtml = `<tr style="background:${rowBg};">`;
-                    rowHtml += `<td style="padding:5px 10px;border-bottom:1px solid #f1f5f9;font-weight:600;color:#1e293b;">${c.gereja}</td>`;
-                    rowHtml += `<td style="padding:5px 6px;border-bottom:1px solid #f1f5f9;color:#64748b;text-align:center;">${c.type}</td>`;
+                    let rowHtml = '<tr style="background:' + rowBg + ';">';
+                    rowHtml += '<td style="padding:5px 10px;border-bottom:1px solid #f1f5f9;font-weight:600;color:#1e293b;">' + c.gereja + '</td>';
+                    rowHtml += '<td style="padding:5px 6px;border-bottom:1px solid #f1f5f9;color:#64748b;text-align:center;">' + c.type + '</td>';
                     const auditColor = isAuditedStatus(c.audit) ? '#0d9488' : '#f97316';
-                    rowHtml += `<td style="padding:5px 6px;border-bottom:1px solid #f1f5f9;color:${auditColor};font-weight:700;text-align:center;">${c.audit !== '-' ? c.audit : '—'}</td>`;
+                    rowHtml += '<td style="padding:5px 6px;border-bottom:1px solid #f1f5f9;color:' + auditColor + ';font-weight:700;text-align:center;">' + (c.audit !== '-' ? c.audit : '—') + '</td>';
                     months.forEach(m => {
                         const ok = c.months[m] === 'Submitted';
-                        rowHtml += `<td style="padding:5px 4px;border-bottom:1px solid #f1f5f9;text-align:center;color:${ok ? '#16a34a' : '#dc2626'};font-weight:700;">${ok ? '✓' : '✗'}</td>`;
+                        rowHtml += '<td style="padding:5px 4px;border-bottom:1px solid #f1f5f9;text-align:center;color:' + (ok ? '#16a34a' : '#dc2626') + ';font-weight:700;">' + (ok ? '✓' : '✗') + '</td>';
                     });
                     rowHtml += '</tr>';
                     tbody.innerHTML += rowHtml;
@@ -849,10 +1068,156 @@
                 wpContent.appendChild(block);
             });
 
-            // Trigger print in wilayah mode
             document.body.classList.add('wilayah-print-mode');
             window.print();
-            document.body.classList.remove('wilayah-print-mode');
+            setTimeout(function() {
+                document.body.classList.remove('wilayah-print-mode');
+            }, 2000);
+        }
+
+        // ── Refresh data (N1) ──────────────────────────────────────────────────────
+        async function refreshData() {
+            const btn = document.getElementById('refresh-btn');
+            const icon = document.getElementById('refresh-icon');
+            btn.disabled = true;
+            icon.classList.add('animate-spin');
+            logDebug('Manual refresh triggered');
+
+            cacheClear();
+
+            rawSheetData = [];
+            await loadSheetFeed();
+            await loadSummaryStats();
+            showToast('Data refreshed!');
+
+            icon.classList.remove('animate-spin');
+            btn.disabled = false;
+        }
+
+        // ── Debug panel (N2) ──────────────────────────────────────────────────────
+        function openDebugPanel() {
+            const modal = document.getElementById('debug-modal');
+            const content = document.getElementById('debug-modal-content');
+            buildDebugReport();
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDebugPanel() {
+            const modal = document.getElementById('debug-modal');
+            const content = document.getElementById('debug-modal-content');
+            modal.classList.add('opacity-0'); content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+            document.body.style.overflow = '';
+        }
+
+        function buildDebugReport() {
+            const el = document.getElementById('debug-content');
+
+            const filteredCount = rawSheetData.filter(c => itemPassesFilters(c)).length;
+            const wilayahCount = [...new Set(rawSheetData.map(c => c.wilayah))].length;
+
+            const lines = [];
+            lines.push('═══════════════════════════════════════════');
+            lines.push('  TNO REPORT — DEBUG DIAGNOSTIC REPORT');
+            lines.push('  Generated: ' + new Date().toISOString());
+            lines.push('═══════════════════════════════════════════');
+            lines.push('');
+            lines.push('── APP STATE ──────────────────────────────');
+            lines.push('  currentYear:        ' + currentYear);
+            lines.push('  currentMonth:       ' + currentMonth);
+            lines.push('  language:           ' + currentLanguage);
+            lines.push('  selDaerah:          ' + selDaerah);
+            lines.push('  selType:            ' + selType);
+            lines.push('  selPic:             ' + selPic);
+            lines.push('  selAudit:           ' + selAudit);
+            lines.push('  selectedWilayah:    ' + (selectedWilayah || 'none'));
+            lines.push('');
+            lines.push('── DATASET INFO ───────────────────────────');
+            lines.push('  sheet ID:           ' + SPREADSHEET_BASE_ID);
+            lines.push('  total raw records:  ' + rawSheetData.length);
+            lines.push('  after filters:      ' + filteredCount);
+            lines.push('  unique wilayah:     ' + wilayahCount);
+            lines.push('');
+            lines.push('── RAW DATA (JSON) ────────────────────────');
+            try {
+                const rawJson = JSON.stringify(rawSheetData, null, 2);
+                lines.push(rawJson);
+            } catch (e) {
+                lines.push('  [ERROR serializing data: ' + e.message + ']');
+            }
+            lines.push('');
+            lines.push('── FILTERED DATA ──────────────────────────');
+            try {
+                const filteredData = rawSheetData.filter(c => itemPassesFilters(c));
+                const filtJson = JSON.stringify(filteredData, null, 2);
+                lines.push(filtJson);
+            } catch (e) {
+                lines.push('  [ERROR: ' + e.message + ']');
+            }
+            lines.push('');
+            lines.push('── WILAYAH AGGREGATIONS ───────────────────');
+            try {
+                const map = {};
+                rawSheetData.forEach(c => {
+                    if (!itemPassesFilters(c)) return;
+                    if (!map[c.wilayah]) map[c.wilayah] = { total: 0, submitted: 0 };
+                    if (currentMonth === 'FULL YEAR') {
+                        map[c.wilayah].total += 12;
+                        months.forEach(m => { if (c.months[m] === 'Submitted') map[c.wilayah].submitted++; });
+                    } else {
+                        map[c.wilayah].total++;
+                        if ((c.months[currentMonth] || 'Pending') === 'Submitted') map[c.wilayah].submitted++;
+                    }
+                });
+                Object.keys(map).sort().forEach(w => {
+                    const s = map[w];
+                    const p = s.total > 0 ? Math.round((s.submitted / s.total) * 100) : 0;
+                    lines.push('  Wilayah ' + w + ': ' + s.submitted + '/' + s.total + ' (' + p + '%)');
+                });
+            } catch (e) {
+                lines.push('  [ERROR: ' + e.message + ']');
+            }
+            lines.push('');
+            lines.push('── CACHE INFO ──────────────────────────────');
+            let cacheEntries = 0;
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const k = sessionStorage.key(i);
+                if (k && k.startsWith('tnocache_')) {
+                    cacheEntries++;
+                    try {
+                        const item = JSON.parse(sessionStorage.getItem(k));
+                        const age = Date.now() - item.ts;
+                        lines.push('  ' + k + ' — ' + (item.data ? item.data.length : 0) + ' rows, ' + Math.round(age / 1000) + 's old');
+                    } catch(_) {
+                        lines.push('  ' + k + ' — (corrupt)');
+                    }
+                }
+            }
+            if (cacheEntries === 0) lines.push('  (no cached entries)');
+            lines.push('');
+            lines.push('── ERROR / DEBUG LOG ───────────────────────');
+            if (debugLog.length === 0) {
+                lines.push('  (no errors logged)');
+            } else {
+                debugLog.forEach(e => {
+                    lines.push('  [' + e.ts + '] ' + e.msg + (e.data ? ' | ' + e.data : ''));
+                });
+            }
+            lines.push('');
+            lines.push('── END OF REPORT ──────────────────────────');
+
+            el.innerText = lines.join('\n');
+        }
+
+        function copyDebugReport() {
+            const text = document.getElementById('debug-content').innerText;
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('Debug report copied to clipboard!');
+            }, function() {
+                showToast('Failed to copy — manual select & copy instead.');
+            });
         }
 
         // ── Year / month helpers ──────────────────────────────────────────────────
@@ -876,7 +1241,7 @@
             document.querySelectorAll('#year-selector button').forEach(b => {
                 b.className = 'py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800 w-full';
             });
-            const active = document.getElementById(`btn-${currentYear}`);
+            const active = document.getElementById('btn-' + currentYear);
             if (active) active.className = 'py-1.5 text-xs font-bold rounded-lg transition-all duration-200 bg-white text-slate-800 shadow-sm w-full';
         }
 
@@ -900,7 +1265,385 @@
             }
         }
 
-        window.onload = initApp;
+        // ── AI Chat (N3) ──────────────────────────────────────────────────────────
+        const chatState = {
+            open: false,
+            messages: [],
+            lastIntent: null,
+            lastContext: {}
+        };
+
+        const MONTH_LOOKUP = {
+            'january': 'JAN', 'jan': 'JAN',
+            'february': 'FEB', 'feb': 'FEB',
+            'march': 'MAR', 'mar': 'MAR',
+            'april': 'APR', 'apr': 'APR',
+            'may': 'MAY',
+            'june': 'JUN', 'jun': 'JUN',
+            'july': 'JUL', 'jul': 'JUL',
+            'august': 'AUG', 'aug': 'AUG',
+            'september': 'SEP', 'sep': 'SEP',
+            'october': 'OCT', 'oct': 'OCT',
+            'november': 'NOV', 'nov': 'NOV',
+            'december': 'DEC', 'dec': 'DEC'
+        };
+
+        function toggleChat() {
+            chatState.open = !chatState.open;
+            const panel = document.getElementById('ai-chat-panel');
+            panel.classList.toggle('hidden', !chatState.open);
+            if (chatState.open) {
+                document.getElementById('chat-input').focus();
+                if (chatState.messages.length === 0) {
+                    const welcome = 'Hi! I can answer questions about the TNO report data.\n\n' +
+                        'Try asking:\n' +
+                        '• "How many churches in Wilayah 2?"\n' +
+                        '• "Which churches are pending for March?"\n' +
+                        '• "Show me SDA Likas"\n' +
+                        '• "What is the submission rate for 2025?"\n' +
+                        '• "Who is the PIC for Wilayah 4?"\n' +
+                        '• "Type help for more commands."';
+                    addChatMessage('bot', welcome);
+                }
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const query = input.value.trim();
+            if (!query) return;
+            input.value = '';
+            addChatMessage('user', query);
+            processChatQuery(query);
+        }
+
+        function addChatMessage(sender, text) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = sender === 'user' ? 'flex justify-end' : 'flex justify-start';
+            const bg = sender === 'user' ? 'bg-blue-600 text-white rounded-br-md' : 'bg-white text-slate-800 rounded-bl-md border border-slate-200';
+            div.innerHTML = '<div class="max-w-[88%] p-2.5 rounded-2xl text-xs leading-relaxed ' + bg + ' whitespace-pre-wrap">' + escapeHtml(text) + '</div>';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            chatState.messages.push({ sender: sender, text: text });
+            if (chatState.messages.length > 20) chatState.messages.shift();
+        }
+
+        function escapeHtml(text) {
+            const d = document.createElement('div');
+            d.textContent = text;
+            return d.innerHTML;
+        }
+
+        function extractEntities(q) {
+            let mentionedMonth = null;
+            for (const name in MONTH_LOOKUP) {
+                if (q.includes(name)) { mentionedMonth = MONTH_LOOKUP[name]; break; }
+            }
+
+            let mentionedYear = null;
+            const ym = q.match(/20\d{2}/);
+            if (ym) mentionedYear = ym[0];
+
+            let mentionedWilayah = null;
+            const wm = q.match(/wilayah\s*(\d+)/i);
+            if (wm) mentionedWilayah = wm[1];
+
+            let mentionedDaerah = null;
+            const daerahs = [...new Set(rawSheetData.map(r => r.daerah).filter(Boolean))];
+            for (const d of daerahs) {
+                if (d && q.includes(d.toLowerCase())) { mentionedDaerah = d; break; }
+            }
+
+            let mentionedChurch = null;
+            const churches = [...new Set(rawSheetData.map(r => r.gereja).filter(Boolean))];
+            for (const ch of churches) {
+                if (ch && q.includes(ch.toLowerCase())) { mentionedChurch = ch; break; }
+            }
+
+            return { mentionedMonth, mentionedYear, mentionedWilayah, mentionedDaerah, mentionedChurch };
+        }
+
+        function processChatQuery(query) {
+            const q = query.toLowerCase().trim();
+
+            if (!rawSheetData || rawSheetData.length === 0) {
+                addChatMessage('bot', 'No data is currently loaded. Please wait for the page to load or click the Refresh button.');
+                return;
+            }
+
+            const entities = extractEntities(q);
+            const { mentionedMonth, mentionedYear, mentionedWilayah, mentionedDaerah, mentionedChurch } = entities;
+
+            const isFollowUp = q.startsWith('what about') || q.startsWith('how about') || q.startsWith('and') || q.startsWith('also');
+
+            // Help
+            if (q.includes('help') || q.includes('what can you do') || q.includes('commands') || q === '?') {
+                addChatMessage('bot',
+                    'I can answer questions about the TNO data:\n\n' +
+                    '📊 General:\n' +
+                    '  "How many churches total?"\n' +
+                    '  "What is the overall submission rate?"\n\n' +
+                    '🔍 By Wilayah / Daerah:\n' +
+                    '  "Show Wilayah 3"\n' +
+                    '  "How many in Kota Kinabalu?"\n\n' +
+                    '📅 By Month / Year:\n' +
+                    '  "Which are pending for March?"\n' +
+                    '  "Change to 2024"\n\n' +
+                    '🏛️ Specific church:\n' +
+                    '  "Show me SDA Likas"\n' +
+                    '  "Who is PIC for SDA Likas?"\n\n' +
+                    '📋 Audit & PIC:\n' +
+                    '  "Who is the PIC for Wilayah 2?"\n' +
+                    '  "Show audited churches"'
+                );
+                chatState.lastIntent = 'help';
+                return;
+            }
+
+            // === Detect intent ===
+            let intent = null;
+
+            if (q.includes('pic') || q.includes('person in charge') || q.includes('who is') || q.includes('responsible') || q.includes('contact') || q.includes('pr pic')) {
+                intent = 'pic';
+            } else if (q.includes('audit') || q.includes('audited') || q.includes('done audit') || q.includes('verify')) {
+                intent = 'audit';
+            } else if (q.includes('how many') || q.includes('count') || q.includes('total number') || q.includes('number of') || q.includes('how much')) {
+                intent = 'count';
+            } else if (q.includes('pending') || q.includes('not submit') || q.includes('not done') || q.includes('missing') || q.includes('outstanding') || q.includes('incomplete') || q.includes("haven't") || q.includes('not yet') || q.includes('still')) {
+                intent = 'pending';
+            } else if (q.includes('submitted') || q.includes('done') || q.includes('completed') || q.includes('finished') || q.includes('receiv') || q.includes('sent')) {
+                intent = 'submitted';
+            } else if (q.includes('percentage') || q.includes('percent') || q.includes('%') || q.includes('rate') || q.includes('completion') || q.includes('progress') || q.includes('overall') || q.includes('done %')) {
+                intent = 'percentage';
+            } else if (q.includes('show') || q.includes('find') || q.includes('search') || q.includes('detail') || q.includes('list') || q.includes('tell me about') || q.includes('what about') || q.includes('display') || q.includes('view')) {
+                intent = 'show';
+            } else if (mentionedYear && q.includes('year')) {
+                intent = 'change_year';
+            } else if (mentionedMonth && !intent) {
+                intent = 'change_month';
+            } else if (isFollowUp && chatState.lastIntent) {
+                intent = chatState.lastIntent;
+            } else {
+                intent = null;
+            }
+
+            chatState.lastIntent = intent;
+
+            // === Execute ===
+            if (!intent) {
+                addChatMessage('bot', "I'm not sure I understood. Try rephrasing, or type 'help' to see what I can do.");
+                return;
+            }
+
+            switch (intent) {
+                case 'pic':       answerPIC(entities, q); break;
+                case 'audit':     answerStatus('audit', entities, q); break;
+                case 'count':     answerCount(entities, q); break;
+                case 'pending':   answerStatus('pending', entities, q); break;
+                case 'submitted': answerStatus('submitted', entities, q); break;
+                case 'percentage': answerPercentage(entities, q); break;
+                case 'show':      answerShow(entities, q); break;
+                case 'change_year':
+                    if (mentionedYear && mentionedYear !== currentYear) {
+                        changeYear(mentionedYear);
+                        addChatMessage('bot', '✅ Switched to year ' + mentionedYear + '.');
+                    } else if (mentionedYear) {
+                        addChatMessage('bot', 'Already viewing year ' + currentYear + '.');
+                    } else {
+                        addChatMessage('bot', 'Currently viewing year ' + currentYear + '.');
+                    }
+                    break;
+                case 'change_month':
+                    if (mentionedMonth) {
+                        if (viewOptions.includes(mentionedMonth)) {
+                            changeMonth(mentionedMonth);
+                            addChatMessage('bot', '✅ Switched to ' + mentionedMonth + ' ' + currentYear + '.');
+                        } else {
+                            addChatMessage('bot', "Month '" + mentionedMonth + "' not valid. Options: " + months.join(', ') + ' or FULL YEAR.');
+                        }
+                    } else {
+                        addChatMessage('bot', 'Currently viewing ' + currentMonth + ' ' + currentYear + '.');
+                    }
+                    break;
+                default:
+                    addChatMessage('bot', "I'm not sure I understood. Try typing 'help'.");
+            }
+        }
+
+        function getFilteredData(entities) {
+            let data = rawSheetData;
+            if (entities.mentionedWilayah) data = data.filter(r => r.wilayah === entities.mentionedWilayah);
+            if (entities.mentionedDaerah) data = data.filter(r => r.daerah === entities.mentionedDaerah);
+            return data;
+        }
+
+        function countSubmitted(data, month) {
+            if (month === 'FULL YEAR') {
+                let s = 0;
+                data.forEach(r => months.forEach(m => { if (r.months[m] === 'Submitted') s++; }));
+                return s;
+            }
+            return data.filter(r => (r.months[month] || 'Pending') === 'Submitted').length;
+        }
+
+        function countTotal(data, month) {
+            return month === 'FULL YEAR' ? data.length * 12 : data.length;
+        }
+
+        function answerCount(entities, q) {
+            const month = entities.mentionedMonth || currentMonth;
+            const data = getFilteredData(entities);
+            if (data.length === 0) { addChatMessage('bot', 'No churches match that criteria.'); return; }
+            const submitted = countSubmitted(data, month);
+            const total = countTotal(data, month);
+            const pct = Math.round((submitted / total) * 100);
+
+            let loc = '';
+            if (entities.mentionedWilayah) loc += ' in Wilayah ' + entities.mentionedWilayah;
+            if (entities.mentionedDaerah) loc += ' in ' + entities.mentionedDaerah;
+
+            addChatMessage('bot',
+                '📊 Total churches' + loc + ': ' + data.length + '\n' +
+                '📅 Period: ' + month + ' ' + (entities.mentionedYear || currentYear) + '\n' +
+                '✅ Submitted: ' + submitted + '/' + total + '\n' +
+                '📈 Completion: ' + pct + '%');
+        }
+
+        function answerStatus(mode, entities, q) {
+            const month = entities.mentionedMonth || currentMonth;
+            let data = getFilteredData(entities);
+            if (entities.mentionedChurch) data = data.filter(r => r.gereja === entities.mentionedChurch);
+            if (data.length === 0) { addChatMessage('bot', 'No churches match that criteria.'); return; }
+
+            if (entities.mentionedChurch) {
+                const c = data[0];
+                let str = '🏛️ **' + c.gereja + '**\n';
+                str += '   Wilayah: ' + c.wilayah + ' | Daerah: ' + c.daerah + '\n';
+                str += '   Type: ' + c.type + ' | PIC: ' + c.prPic + ' | Audit: ' + c.audit + '\n\n';
+                str += '   Monthly status:\n';
+                months.forEach(m => {
+                    const ok = c.months[m] === 'Submitted';
+                    str += '   ' + m + ': ' + (ok ? '✅ Submitted' : '🔴 Pending') + '\n';
+                });
+                addChatMessage('bot', str);
+                return;
+            }
+
+            const submitted = countSubmitted(data, month);
+            const total = countTotal(data, month);
+            const pending = total - submitted;
+
+            const list = mode === 'pending'
+                ? data.filter(r => (r.months[month] || 'Pending') !== 'Submitted')
+                : data.filter(r => (r.months[month] || 'Pending') === 'Submitted');
+
+            let loc = '';
+            if (entities.mentionedWilayah) loc += ' Wilayah ' + entities.mentionedWilayah;
+            if (entities.mentionedDaerah) loc += ' ' + entities.mentionedDaerah;
+
+            let msg = (mode === 'pending' ? '🔴' : '✅') + ' ' + (mode === 'pending' ? 'Pending' : 'Submitted') + ' churches' + loc + ' for ' + month + ' ' + (entities.mentionedYear || currentYear) + ':\n\n';
+            if (list.length === 0) {
+                msg += (mode === 'pending' ? 'All churches have submitted! 🎉' : 'No churches have submitted yet.');
+            } else if (list.length <= 20) {
+                msg += list.map(r => '• ' + r.gereja + ' (W' + r.wilayah + ', ' + r.daerah + ')').join('\n');
+                msg += '\n\n' + list.length + ' of ' + total + ' churches';
+            } else {
+                msg += list.slice(0, 20).map(r => '• ' + r.gereja + ' (W' + r.wilayah + ', ' + r.daerah + ')').join('\n');
+                msg += '\n\n... and ' + (list.length - 20) + ' more. Total: ' + list.length + ' of ' + total;
+            }
+            addChatMessage('bot', msg);
+        }
+
+        function answerPercentage(entities, q) {
+            const month = entities.mentionedMonth || currentMonth;
+            const data = getFilteredData(entities);
+            if (data.length === 0) { addChatMessage('bot', 'No data to calculate percentage.'); return; }
+            const submitted = countSubmitted(data, month);
+            const total = countTotal(data, month);
+            const pct = Math.round((submitted / total) * 100);
+            const pending = total - submitted;
+
+            let loc = '';
+            if (entities.mentionedWilayah) loc += ' Wilayah ' + entities.mentionedWilayah;
+            if (entities.mentionedDaerah) loc += ' ' + entities.mentionedDaerah;
+
+            addChatMessage('bot',
+                '📈 Submission rate' + loc + ' (' + month + ' ' + (entities.mentionedYear || currentYear) + '):\n\n' +
+                '✅ ' + pct + '% completed\n' +
+                '📊 ' + submitted + ' submitted / ' + total + ' total\n' +
+                '⏳ ' + pending + ' pending');
+        }
+
+        function answerShow(entities, q) {
+            if (entities.mentionedChurch) {
+                answerStatus('pending', entities, q);
+                return;
+            }
+            if (entities.mentionedWilayah || entities.mentionedDaerah) {
+                const data = getFilteredData(entities);
+                if (data.length === 0) { addChatMessage('bot', 'No data found.'); return; }
+                const month = entities.mentionedMonth || currentMonth;
+                const submitted = countSubmitted(data, month);
+                const total = countTotal(data, month);
+                const pct = Math.round((submitted / total) * 100);
+
+                let msg = '📋 Showing ' + data.length + ' churches';
+                if (entities.mentionedWilayah) msg += ' in Wilayah ' + entities.mentionedWilayah;
+                if (entities.mentionedDaerah) msg += ' in ' + entities.mentionedDaerah;
+                msg += ' (' + month + ' ' + (entities.mentionedYear || currentYear) + ')\n\n';
+                msg += '📍 Overview: ' + submitted + '/' + total + ' submitted (' + pct + '%)\n\n';
+
+                if (data.length <= 15) {
+                    data.forEach(c => {
+                        const ok = (c.months[month] || 'Pending') === 'Submitted';
+                        msg += '• ' + (ok ? '✅' : '🔴') + ' ' + c.gereja + ' (W' + c.wilayah + ') — ' + c.daerah + '\n';
+                    });
+                } else {
+                    data.slice(0, 15).forEach(c => {
+                        const ok = (c.months[month] || 'Pending') === 'Submitted';
+                        msg += '• ' + (ok ? '✅' : '🔴') + ' ' + c.gereja + ' (W' + c.wilayah + ') — ' + c.daerah + '\n';
+                    });
+                    msg += '\n... and ' + (data.length - 15) + ' more.';
+                }
+                addChatMessage('bot', msg);
+                return;
+            }
+            addChatMessage('bot', 'Try being more specific — e.g. "show Wilayah 3", "show SDA Likas", or "list churches in Kota Kinabalu".');
+        }
+
+        function answerPIC(entities, q) {
+            const data = getFilteredData(entities);
+            if (data.length === 0) { addChatMessage('bot', 'No churches match that criteria.'); return; }
+
+            const pics = [...new Set(data.map(r => r.prPic).filter(p => p && p !== '-'))];
+            if (pics.length === 0) {
+                addChatMessage('bot', 'No PR PIC information found for this selection.');
+                return;
+            }
+
+            let loc = '';
+            if (entities.mentionedWilayah) loc += ' Wilayah ' + entities.mentionedWilayah;
+            if (entities.mentionedDaerah) loc += ' ' + entities.mentionedDaerah;
+            if (entities.mentionedChurch) loc += ' for ' + entities.mentionedChurch;
+
+            let msg = '👤 PR PIC' + loc + ':\n\n';
+            if (pics.length <= 10) {
+                pics.sort().forEach(p => {
+                    const count = data.filter(r => r.prPic === p).length;
+                    msg += '• ' + p + ' (' + count + ' churches)\n';
+                });
+            } else {
+                msg += pics.length + ' different PICs found. Top 10:\n\n';
+                pics.sort().slice(0, 10).forEach(p => {
+                    const count = data.filter(r => r.prPic === p).length;
+                    msg += '• ' + p + ' (' + count + ' churches)\n';
+                });
+            }
+            addChatMessage('bot', msg);
+        }
+
+        window.onload = function() { initApp(); };
     </script>
 </body>
 </html>
