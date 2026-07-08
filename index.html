@@ -523,11 +523,11 @@ async function loadData(){
   document.getElementById('main').innerHTML='<div class="center-state"><div class="spin"></div><div>'+gt('fetching')+'</div></div>';
   try{
     rawSheetData=await fetchCached(currentYear);
-    buildFilters();
     document.getElementById('loader').classList.add('hide');
     if(!document.getElementById('ft').style.display||document.getElementById('ft').style.display==='none')document.getElementById('ft').style.display='';
     document.getElementById('ftT').textContent=gt('sa')+' '+new Date().toLocaleString();
     renderAll();
+    buildFilters();
     loadSummary();
   }catch(e){
     document.getElementById('main').innerHTML='<div class="center-state"><p style="color:var(--red);font-weight:700">Failed to load data.</p><p style="font-size:12px;color:var(--muted)">'+e.message+'</p></div>';
