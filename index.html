@@ -1,1649 +1,971 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TNO Report Submission Status — Sabah Mission</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .modal-scroll::-webkit-scrollbar { width: 6px; }
-        .modal-scroll::-webkit-scrollbar-track { background: transparent; }
-        .modal-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAB Mission — TNO Report Status</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{
+  --bg:#07111f;--bg2:#0c1a2e;--bg3:#0f2040;
+  --panel:rgba(255,255,255,0.035);--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --blue:#1d6bf3;--blue2:#3b82f6;--sky:#60a5fa;--cyan:#22d3ee;
+  --green:#10b981;--amber:#f59e0b;--red:#ef4444;--gold:#f0b429;
+  --purple:#8b5cf6;--pink:#ec4899;
+  --white:#ffffff;--off:#f8fafc;--muted:#cbd5e1;--muted2:#94a3b8;
+  --r:14px;--r2:10px;--sh:0 8px 32px rgba(0,0,0,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;width:100%;overflow-x:hidden}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;overflow-x:hidden;width:100%}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 900px 600px at -10% -10%,rgba(29,107,243,.12) 0%,transparent 70%),
+  radial-gradient(ellipse 700px 500px at 110% 110%,rgba(240,180,41,.07) 0%,transparent 70%),
+  radial-gradient(ellipse 500px 400px at 55% 50%,rgba(34,211,238,.04) 0%,transparent 60%)}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:56px 56px}
 
-        @media (max-width: 767px) {
-            #mobile-filter-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-            #mobile-filter-panel.open { max-height: 600px; }
-        }
+/* Loader */
+#loader{position:fixed;inset:0;z-index:99999;background:#07111f;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s ease,visibility .6s ease}
+#loader.hide{opacity:0;visibility:hidden;pointer-events:none}
+#loader-logo{width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:24px;animation:loaderPulse 2s ease-in-out infinite;box-shadow:0 0 40px rgba(29,107,243,.3)}
+.loader-logo-fallback{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#1d6bf3,#22d3ee);display:none;align-items:center;justify-content:center;font-weight:800;font-size:22px;color:#fff;margin-bottom:24px;animation:loaderPulse 2s ease-in-out infinite;box-shadow:0 0 40px rgba(29,107,243,.3)}
+@keyframes loaderPulse{0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(29,107,243,.3)}50%{transform:scale(1.06);box-shadow:0 0 60px rgba(29,107,243,.5)}}
+#loader-ring{width:56px;height:56px;border:3px solid rgba(255,255,255,.06);border-top-color:var(--blue2);border-radius:50%;animation:loaderSpin .9s linear infinite;margin-bottom:20px}
+@keyframes loaderSpin{to{transform:rotate(360deg)}}
+#loader-title{font-size:20px;font-weight:800;background:linear-gradient(120deg,#fff,var(--sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+#loader-sub{font-size:13px;color:var(--muted);font-weight:600}
+#loader-bar{width:200px;height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:28px;overflow:hidden}
+#loader-bar-fill{height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,var(--blue2),var(--cyan));animation:loaderBar 2.4s ease-in-out infinite}
+@keyframes loaderBar{0%{width:0;margin-left:0}50%{width:100%;margin-left:0}100%{width:0;margin-left:100%}}
+#loader-dots{display:flex;gap:5px;margin-top:14px}
+#loader-dots span{width:5px;height:5px;background:var(--muted2);border-radius:50%;animation:loaderDot 1.4s infinite}
+#loader-dots span:nth-child(2){animation-delay:.2s}
+#loader-dots span:nth-child(3){animation-delay:.4s}
+@keyframes loaderDot{0%,80%,100%{opacity:.2;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
 
-        /* Wilayah print styles — only active when body has class wilayah-print-mode */
-        body.wilayah-print-mode .main-header,
-        body.wilayah-print-mode main,
-        body.wilayah-print-mode footer { display: none !important; }
-        body.wilayah-print-mode #wilayah-print-area { display: block !important; }
+.page{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh}
+header{position:sticky;top:0;z-index:200;background:rgba(7,17,31,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.hdr{max-width:1500px;margin:0 auto;padding:0 28px;height:66px;display:flex;align-items:center;gap:16px}
+.logo{display:flex;align-items:center;gap:13px;text-decoration:none;color:inherit;flex-shrink:0}
+.logo-img{height:40px;width:auto;object-fit:contain;flex-shrink:0;border-radius:6px;background:#fff;padding:4px}
+.logo-fallback{width:40px;height:40px;border-radius:6px;background:#1d6bf3;display:none;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;color:#fff}
+.logo-name{font-size:14px;font-weight:800;background:linear-gradient(120deg,#fff,var(--sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-tagline{font-size:10px;color:var(--muted);letter-spacing:1.4px;text-transform:uppercase}
+.hdr-mid{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.yr-btn{padding:5px 14px;border-radius:18px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.yr-btn:hover{color:var(--white);border-color:var(--border2)}
+.yr-btn.on{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 14px rgba(29,107,243,.45)}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.lang-toggle{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r2);padding:3px;gap:2px}
+.lang-btn{padding:6px 12px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:11px;font-weight:800;cursor:pointer;transition:all .22s}
+.lang-btn.on{background:var(--blue);color:#fff;box-shadow:0 3px 12px rgba(29,107,243,.4)}
+.icon-btn{padding:7px 13px;border-radius:var(--r2);border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
+.icon-btn:hover{color:var(--white);border-color:var(--border2)}
+main{max-width:1500px;margin:0 auto;padding:32px 28px 80px;flex:1;width:100%}
+.center-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px;gap:14px;color:var(--muted);font-size:14px;text-align:center;font-weight:600}
+.spin{width:40px;height:40px;border:3px solid rgba(255,255,255,.06);border-top-color:var(--blue2);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.page-header{margin-bottom:28px}
+.mode-label{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px}
+.lbl-c{background:rgba(29,107,243,.12);border:1px solid rgba(29,107,243,.25);color:var(--sky)}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(26px,3.5vw,42px);font-weight:700;line-height:1.1;margin-bottom:6px}
+.page-title em{font-style:italic;font-weight:400}
+.ac-blue{background:linear-gradient(120deg,var(--sky),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ac-gold{background:linear-gradient(120deg,var(--gold),#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.page-sub{color:var(--muted);font-size:13px;font-weight:600;line-height:1.5}
 
-        @media print {
-            body:not(.wilayah-print-mode) { background: white !important; color: black !important; }
-            body:not(.wilayah-print-mode) .print-hide { display: none !important; }
-            body:not(.wilayah-print-mode) .print-w-full { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
-            body:not(.wilayah-print-mode) .print-break-avoid { break-inside: avoid; page-break-inside: avoid; }
-            body:not(.wilayah-print-mode) .print-shadow-none { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+.kpi{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s;cursor:default}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.kpi.cb::before{background:linear-gradient(90deg,var(--blue2),transparent)}
+.kpi.cg::before{background:linear-gradient(90deg,var(--green),transparent)}
+.kpi.ca::before{background:linear-gradient(90deg,var(--amber),transparent)}
+.kpi.cr::before{background:linear-gradient(90deg,var(--red),transparent)}
+.kpi.co::before{background:linear-gradient(90deg,var(--gold),transparent)}
+.kpi.cp::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.kpi.ck::before{background:linear-gradient(90deg,var(--pink),transparent)}
+.kpi.ct::before{background:linear-gradient(90deg,var(--cyan),transparent)}
+.kpi.cv::before{background:linear-gradient(90deg,#f472b6,transparent)}
+.kpi-ic{font-size:20px;margin-bottom:8px}
+.kpi-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+.kpi-val{font-size:32px;font-weight:800;line-height:1;margin-bottom:3px}
+.kpi.cb .kpi-val{color:var(--sky)}.kpi.cg .kpi-val{color:var(--green)}.kpi.ca .kpi-val{color:var(--amber)}.kpi.cr .kpi-val{color:var(--red)}.kpi.co .kpi-val{color:var(--gold)}.kpi.cp .kpi-val{color:var(--purple)}.kpi.ck .kpi-val{color:var(--pink)}.kpi.ct .kpi-val{color:var(--cyan)}.kpi.cv .kpi-val{color:#f472b6}
+.kpi-meta{font-size:11px;color:var(--muted);font-weight:600}
+.kpi-bar{height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:11px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(.34,1.56,.64,1)}
+.kpi.cg .kpi-bar-fill{background:var(--green)}.kpi.ca .kpi-bar-fill{background:var(--amber)}.kpi.co .kpi-bar-fill{background:var(--gold)}.kpi.cr .kpi-bar-fill{background:var(--red)}.kpi.cb .kpi-bar-fill{background:var(--blue2)}.kpi.ct .kpi-bar-fill{background:var(--cyan)}.kpi.cp .kpi-bar-fill{background:var(--purple)}.kpi.ck .kpi-bar-fill{background:var(--pink)}
 
-            /* Wilayah-specific print */
-            body.wilayah-print-mode #wilayah-print-area { display: block !important; padding: 24px; }
-            body.wilayah-print-mode .wp-break-avoid { break-inside: avoid; page-break-inside: avoid; }
-        }
+/* Layout */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:24px}
 
-        /* ── Chat panel styles ── */
-        #ai-chat-panel {
-            box-shadow: 0 10px 40px rgba(0,0,0,0.18);
-        }
-        #chat-messages::-webkit-scrollbar { width: 4px; }
-        #chat-messages::-webkit-scrollbar-track { background: transparent; }
-        #chat-messages::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
-        #chat-input::placeholder { color: #94a3b8; font-weight: 600; }
-        .chat-msg-bot a { color: #3b82f6; text-decoration: underline; }
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;position:relative;overflow:hidden}
+.card-t{font-size:14px;font-weight:800;margin-bottom:3px}
+.card-s{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:18px}
+.sec{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.6px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
 
-        /* ── Debug panel ── */
-        #debug-content::-webkit-scrollbar { width: 6px; }
-        #debug-content::-webkit-scrollbar-track { background: #1e293b; }
-        #debug-content::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
+/* Donut */
+.donut-area{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.donut-box{position:relative;width:160px;height:160px;flex-shrink:0}
+.donut-box canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.d-pct{font-size:28px;font-weight:800;line-height:1}
+.d-lbl{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+.legend{display:flex;flex-direction:column;gap:9px;flex:1;min-width:130px}
+.li{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:600}
+.ldot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ll{color:var(--muted);flex:1}
+.lv{font-weight:800;color:var(--off)}
+.lp{font-size:11px;color:var(--muted2)}
 
-        /* ── Refresh spinner ── */
-        @keyframes spin-slow { to { transform: rotate(360deg); } }
-        .animate-spin-slow { animation: spin-slow 1s linear infinite; }
+/* Bar list */
+.bar-list{display:flex;flex-direction:column;gap:13px;max-height:400px;overflow-y:auto;padding-right:4px}
+.bar-list::-webkit-scrollbar{width:3px}
+.bar-list::-webkit-scrollbar-track{background:transparent}
+.bar-list::-webkit-scrollbar-thumb{background:var(--muted2);border-radius:2px}
+.brow{display:flex;flex-direction:column;gap:5px}
+.bhdr{display:flex;justify-content:space-between;align-items:baseline}
+.bname{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.bstat{font-size:11px;color:var(--muted);font-weight:600}
+.btrack{height:7px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden}
+.bfill{height:100%;border-radius:4px;transition:width 1.3s cubic-bezier(.34,1.56,.64,1)}
 
-        /* ── Toast ── */
-        #toast { transition: opacity 0.3s ease, transform 0.3s ease; }
-        #toast.hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
-    </style>
+/* Pill */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:800;white-space:nowrap}
+.pill::before{content:'';width:6px;height:6px;border-radius:50%}
+.pa{background:rgba(16,185,129,.15);color:#4ade80}.pa::before{background:#10b981;box-shadow:0 0 5px #10b981}
+.pw{background:rgba(245,158,11,.15);color:#fcd34d}.pw::before{background:#f59e0b;animation:blink 1.6s infinite}
+.pp{background:rgba(239,68,68,.15);color:#fca5a5}.pp::before{background:#ef4444}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Wilayah grid */
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:32px}
+.wcard{background:var(--panel);border:1px solid var(--border);border-radius:var(--r2);padding:16px 18px;cursor:pointer;transition:all .2s}
+.wcard:hover,.wcard.act{border-color:rgba(59,130,246,.45);background:rgba(59,130,246,.06);transform:translateY(-1px)}
+.wcard.act{box-shadow:0 0 0 1px rgba(59,130,246,.3)}
+.wname{font-size:13px;font-weight:800;margin-bottom:11px;display:flex;align-items:center;gap:7px}
+.wstats{display:flex;gap:14px;margin-bottom:10px}
+.ws{display:flex;flex-direction:column;gap:1px}
+.wsv{font-size:17px;font-weight:800;line-height:1}
+.wsl{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.wprog{height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+.wfill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width 1.2s ease}
+.wpct{font-size:10px;color:var(--muted);font-weight:600;text-align:right;margin-top:4px}
+
+/* Table */
+.tbl-ctrl{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.srch{flex:1;min-width:180px;position:relative}
+.srch input{width:100%;padding:8px 12px 8px 34px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r2);color:var(--white);font-family:inherit;font-size:12px;font-weight:600;outline:none;transition:border-color .2s}
+.srch input:focus{border-color:var(--blue2)}
+.srch input::placeholder{color:var(--muted)}
+.sic{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none}
+.flt{padding:8px 11px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r2);color:var(--white);font-family:inherit;font-size:12px;font-weight:600;outline:none;cursor:pointer}
+.flt option{background:#0c1a2e;font-weight:600}
+.twrap{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{padding:11px 14px;text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);white-space:nowrap;user-select:none}
+tbody tr{border-bottom:1px solid var(--border);transition:background .14s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+td{padding:11px 14px;color:var(--off);font-weight:500;white-space:nowrap}
+
+/* Card Detail Modal */
+#cardDetailModal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);overflow-y:auto;padding:40px 20px}
+#cardDetailModal.open{display:flex;align-items:center;justify-content:center}
+.cd-wrap{width:100%;max-width:640px;background:#0c1a2e;border:1px solid var(--border);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.6);max-height:90vh;display:flex;flex-direction:column}
+.cd-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0}
+.cd-hdr h3{font-size:18px;font-weight:800;color:var(--white)}
+.cd-hdr .cd-sub{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px}
+.cd-close{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;font-family:inherit}
+.cd-close:hover{color:var(--white);border-color:rgba(255,255,255,.25)}
+.cd-body{padding:18px 22px;overflow-y:auto;flex:1}
+.cd-body::-webkit-scrollbar{width:4px}
+.cd-body::-webkit-scrollbar-track{background:transparent}
+.cd-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+.cd-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px}
+.cd-sum-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center}
+.cd-sum-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px}
+.cd-sum-val{font-size:20px;font-weight:800;color:var(--off)}
+.cd-sum-val.green{color:var(--green)}.cd-sum-val.amber{color:var(--amber)}.cd-sum-val.red{color:var(--red)}.cd-sum-val.blue{color:var(--sky)}.cd-sum-val.gold{color:var(--gold)}
+.cd-table{width:100%;border-collapse:collapse;font-size:12px}
+.cd-table th{padding:9px 12px;text-align:left;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);position:sticky;top:0}
+.cd-table td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--off);font-weight:500}
+.cd-table tr:last-child td{border-bottom:none}
+.cd-table tbody tr:hover{background:rgba(255,255,255,.025)}
+.cd-empty{padding:24px;text-align:center;color:var(--muted);font-weight:600;font-size:13px}
+
+/* Debug Modal */
+#debugModal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);overflow-y:auto;padding:40px 20px}
+#debugModal.open{display:flex;align-items:center;justify-content:center}
+#debugContent{font-family:monospace;font-size:11px;color:#e2eaff;white-space:pre-wrap;background:rgba(0,0,0,.3);border-radius:10px;padding:16px;max-height:65vh;overflow-y:auto;line-height:1.6}
+
+/* Chat */
+#chatFloatingBtn{position:fixed;bottom:24px;right:24px;z-index:9998;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#1d6bf3,#3b82f6);border:none;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(29,107,243,.45);display:flex;align-items:center;justify-content:center;transition:all .25s;animation:chatPulse 3s ease-in-out infinite}
+#chatFloatingBtn:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(29,107,243,.55)}
+@keyframes chatPulse{0%,100%{box-shadow:0 4px 20px rgba(29,107,243,.45)}50%{box-shadow:0 4px 30px rgba(29,107,243,.7)}}
+#chatPanel{position:fixed;bottom:90px;right:24px;z-index:9997;width:380px;max-height:560px;height:560px;background:#0c1a2e;border:1px solid rgba(255,255,255,.1);border-radius:16px;display:none;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.6);overflow:hidden;animation:chatSlide .3s ease}
+@keyframes chatSlide{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+#chatPanel.open{display:flex}
+#chatHeader{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,rgba(29,107,243,.2),rgba(34,211,238,.08));border-bottom:1px solid var(--border);flex-shrink:0}
+#chatHeader .title{display:flex;align-items:center;gap:9px;font-weight:800;font-size:14px;color:var(--white)}
+#chatHeader .close-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--muted);width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;font-family:inherit}
+#chatHeader .close-btn:hover{color:var(--white);border-color:rgba(255,255,255,.25)}
+#chatMessages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+#chatMessages::-webkit-scrollbar{width:4px}
+#chatMessages::-webkit-scrollbar-track{background:transparent}
+#chatMessages::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+.chat-msg{max-width:88%;padding:10px 14px;border-radius:12px;font-size:12px;line-height:1.55;font-weight:500;white-space:pre-wrap;word-wrap:break-word}
+.chat-user{background:#1d6bf3;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-bot{background:rgba(255,255,255,.06);color:var(--off);align-self:flex-start;border-bottom-left-radius:4px;border:1px solid rgba(255,255,255,.05)}
+.chat-bot strong{color:var(--sky)}
+#chatInputArea{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border);background:rgba(0,0,0,.15);flex-shrink:0}
+#chatInput{flex:1;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--white);font-family:inherit;font-size:12px;font-weight:600;outline:none;transition:border-color .2s}
+#chatInput:focus{border-color:var(--blue2)}
+#chatInput::placeholder{color:var(--muted2)}
+#chatSendBtn{padding:10px 18px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;font-weight:800;font-size:12px;cursor:pointer;transition:all .2s;font-family:inherit;white-space:nowrap}
+#chatSendBtn:hover{box-shadow:0 4px 14px rgba(29,107,243,.4)}
+
+/* Month selector */
+.month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.month-btn{padding:5px 8px;border-radius:18px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;text-align:center}
+.month-btn:hover{color:var(--white);border-color:var(--border2)}
+.month-btn.on{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 10px rgba(29,107,243,.35)}
+.month-btn.full{grid-column:span 4;background:rgba(255,255,255,.04);border-color:var(--border2);font-size:9px;letter-spacing:1px}
+
+/* Filter panel */
+.filter-panel{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;align-items:end}
+.filter-group{display:flex;flex-direction:column;gap:3px}
+.filter-label{font-size:9px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+.filter-panel select{min-width:130px}
+
+.fade-in{animation:fi .45s ease both}
+@keyframes fi{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+footer{text-align:center;padding:16px;font-size:11px;font-weight:600;color:var(--muted);border-top:1px solid var(--border)}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:99999;background:rgba(15,23,42,.95);color:#fff;padding:10px 20px;border-radius:12px;font-size:12px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:opacity .3s;pointer-events:none;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08)}
+#toast.hidden{opacity:0}
+
+/* Print */
+@media print{
+  body{background:#fff!important;color:#0f172a!important}
+  body::before,body::after{display:none!important}
+  .page,.hdr-right,.lang-toggle,#chatFloatingBtn,#chatPanel,#debugModal,#cardDetailModal,#toast,#loader{display:none!important}
+  header{position:static!important;background:#fff!important;border-bottom:2px solid #e2e8f0}
+  .logo-name,.page-title em{background:none!important;-webkit-text-fill-color:#0f172a!important;color:#0f172a!important}
+  .kpi,.card,.wcard{background:#fff!important;border:1px solid #e2e8f0!important}
+  .kpi-val,.wsv,.cd-sum-val{color:#0f172a!important}
+  .kpi-lbl,.kpi-meta,.card-s,.sec,.wsl,.wpct,.bstat{color:#64748b!important}
+  thead th{background:#f8fafc!important;color:#475569!important}
+  td{color:#334155!important}
+  .bfill,.wfill{background:#10b981!important}
+  main{padding:20px 0}
+  @page{size:A4;margin:10mm}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+}
+
+@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(2,1fr)}.g2,.g3,.g4{grid-template-columns:1fr}}
+@media(max-width:768px){
+  .hdr{padding:10px 14px;height:auto;flex-wrap:wrap;row-gap:10px}
+  .logo{flex:1 1 auto}
+  .logo-name{font-size:15px}
+  .logo-tagline{font-size:10px}
+  .logo-img{height:36px}
+  .hdr-mid{order:3;flex:1 1 100%;justify-content:flex-start;overflow-x:auto;gap:6px;padding-bottom:2px}
+  .hdr-mid::-webkit-scrollbar{display:none}
+  .yr-btn{flex-shrink:0;padding:8px 16px;font-size:14px}
+  .hdr-right{order:2;flex:0 0 auto;margin-left:auto;gap:6px}
+  .icon-btn{padding:8px 10px;font-size:12px}
+  .icon-btn .lbl{display:none}
+  main{padding:18px 14px 60px}
+  .page-title{font-size:24px}
+  .page-sub{font-size:13px}
+  .kpi-row{grid-template-columns:repeat(2,1fr);gap:10px}
+  .kpi{padding:14px}
+  .kpi-val{font-size:26px}
+  .filter-panel{flex-direction:column;align-items:stretch}
+  .filter-panel select{width:100%}
+  .month-grid{grid-template-columns:repeat(4,1fr)}
+  .wgrid{grid-template-columns:1fr}
+  #chatFloatingBtn{bottom:18px;right:18px;width:60px;height:60px;font-size:28px}
+  #chatPanel{width:calc(100vw - 20px);right:10px;bottom:90px;max-height:75vh;height:75vh}
+}
+@media(max-width:480px){
+  .hdr{padding:8px 10px}
+  .logo-name{font-size:14px}.logo-tagline{display:none}
+  .logo-img{height:32px}
+  .yr-btn{padding:7px 14px;font-size:13px}
+  .icon-btn{padding:7px 8px;font-size:11px}
+  main{padding:14px 10px 50px}
+  .page-title{font-size:22px}
+  .kpi-row{grid-template-columns:repeat(2,1fr);gap:8px}
+  .kpi{padding:12px 10px}
+  .kpi-val{font-size:24px}
+  .month-grid{grid-template-columns:repeat(4,1fr)}
+  .month-btn{font-size:9px;padding:4px 6px}
+  #chatFloatingBtn{bottom:14px;right:14px;width:58px;height:58px;font-size:26px}
+  #chatPanel{width:calc(100vw - 14px);right:7px;bottom:82px;max-height:78vh;height:78vh}
+}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col selection:bg-blue-500 selection:text-white print:bg-white">
+<body>
 
-    <!-- ═══ WILAYAH PRINT AREA (hidden unless printing wilayah) ═══ -->
-    <div id="wilayah-print-area" style="display:none;" class="p-6 bg-white text-slate-800">
-        <div class="text-center pb-4 border-b-2 border-slate-800 mb-6">
-            <h1 class="text-xl font-extrabold uppercase text-black">TNO Report — Wilayah Detail</h1>
-            <p class="text-sm text-slate-600 font-bold mt-1 uppercase">SABAH MISSION — FINANCE DEPARTMENT</p>
-            <p class="text-xs text-slate-500 mt-1 font-bold" id="wp-timestamp"></p>
-            <p class="text-sm font-extrabold text-slate-800 mt-2" id="wp-title"></p>
-        </div>
-        <div id="wp-content" class="grid grid-cols-1 gap-4"></div>
+<div id="loader">
+  <img src="SDA-LOGO.png" alt="SDA Logo" id="loader-logo"
+       onerror="this.style.display='none';document.getElementById('loader-lf').style.display='flex'">
+  <div id="loader-lf" class="loader-logo-fallback">SDA</div>
+  <div id="loader-ring"></div>
+  <div id="loader-title">TNO Report Dashboard</div>
+  <div id="loader-sub">Loading submission data from Google Sheets…</div>
+  <div id="loader-bar"><div id="loader-bar-fill"></div></div>
+  <div id="loader-dots"><span></span><span></span><span></span></div>
+</div>
+
+<div class="page">
+<header>
+  <div class="hdr">
+    <a class="logo" href="#">
+      <img src="SDA-LOGO.png" alt="SDA Logo" class="logo-img"
+           onerror="this.style.display='none';document.getElementById('lf').style.display='flex'">
+      <div id="lf" class="logo-fallback" style="display:none">SDA</div>
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <span class="logo-name">SAB Mission</span>
+        <span class="logo-tagline">TNO Report Status</span>
+      </div>
+    </a>
+    <div class="hdr-mid" id="yrSel"></div>
+    <div class="hdr-right">
+      <div class="lang-toggle">
+        <button class="lang-btn on" id="langEn" onclick="changeLang('en')">EN</button>
+        <button class="lang-btn" id="langBm" onclick="changeLang('bm')">BM</button>
+      </div>
+      <button class="icon-btn" onclick="doRefresh()"><span>↻</span><span class="lbl">Refresh</span></button>
+      <button class="icon-btn" onclick="showDebug()" style="border-color:rgba(239,68,68,.4);color:#fca5a5"><span>🐞</span><span class="lbl">Debug</span></button>
     </div>
+  </div>
+</header>
 
-    <!-- ═══ MAIN HEADER ═══ -->
-    <header class="main-header bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40 px-4 md:px-8 py-3 md:py-4 print-hide">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-            <div class="flex items-center justify-between w-full md:w-auto gap-3 md:gap-4">
-                <div class="order-1 md:order-2 flex flex-col">
-                    <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-slate-900 leading-tight" data-lang="title">TNO Report Submission Status</h1>
-                    <p class="text-[10px] md:text-xs text-slate-500 font-bold tracking-wide uppercase" data-lang="subtitle">SABAH MISSION — FINANCE DEPARTMENT</p>
-                </div>
-                <img src="SDA-LOGO.png" alt="SDA Logo" class="h-10 md:h-12 w-auto object-contain order-2 md:order-1 shrink-0">
-            </div>
-            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-                <div class="flex bg-slate-100 rounded-lg p-0.5 border border-slate-200">
-                    <button onclick="changeLang('en')" id="lang-en" class="px-3 py-1 text-xs font-bold rounded-md bg-white text-blue-700 transition shadow-sm border border-slate-200/50">EN</button>
-                    <button onclick="changeLang('bm')" id="lang-bm" class="px-3 py-1 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800 transition">BM</button>
-                </div>
+<main id="main">
+  <div class="center-state">
+    <div class="spin"></div>
+    <div>Loading data from Google Sheets…</div>
+  </div>
+</main>
 
-                <!-- NEW: Refresh button -->
-                <button onclick="refreshData()" id="refresh-btn" class="flex items-center gap-1.5 bg-slate-600 hover:bg-slate-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm disabled:opacity-60 disabled:cursor-wait">
-                    <svg id="refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    <span class="hidden sm:inline" data-lang="refreshBtn">Refresh</span>
-                </button>
+<footer id="ft" style="display:none">
+  SAB Mission — Finance Department &nbsp;·&nbsp; <span id="ftT"></span>
+</footer>
+</div>
 
-                <!-- NEW: Debug button -->
-                <button onclick="openDebugPanel()" class="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <span class="hidden sm:inline">Debug</span>
-                </button>
-
-                <button onclick="window.print()" class="hidden md:flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                    <span data-lang="printBtn">Print Report</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <div class="hidden print:block text-center py-6 border-b-2 border-slate-800 mb-6">
-        <h1 class="text-2xl font-bold uppercase text-black" data-lang="title">TNO Report Submission Status</h1>
-        <p class="text-sm text-slate-600 font-bold mt-1 uppercase" data-lang="subtitle">SABAH MISSION — FINANCE DEPARTMENT</p>
-        <p class="text-xs text-slate-500 mt-2 font-bold" id="print-timestamp"></p>
+<!-- Card Detail Modal -->
+<div id="cardDetailModal">
+  <div class="cd-wrap">
+    <div class="cd-hdr">
+      <div>
+        <h3 id="cdTitle"></h3>
+        <div class="cd-sub" id="cdSub"></div>
+      </div>
+      <button class="cd-close" onclick="closeCardDetails()">✕</button>
     </div>
+    <div class="cd-body" id="cdBody"></div>
+  </div>
+</div>
 
-    <main class="max-w-7xl mx-auto w-full px-4 md:px-8 mt-6 flex-grow flex flex-col md:flex-row gap-6 items-start print-w-full">
-
-        <!-- ═══ SIDEBAR ═══ -->
-        <section class="w-full md:w-80 shrink-0 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4 md:sticky md:top-24 z-30 print-hide">
-            <div class="flex items-center justify-between p-4 md:hidden cursor-pointer" onclick="toggleMobileFilters()">
-                <div class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"></path></svg>
-                    <span class="text-sm font-bold text-slate-700">Filters &amp; View</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span id="mobile-filter-badge" class="hidden text-[10px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full">Active</span>
-                    <svg id="mobile-filter-chevron" class="w-4 h-4 text-slate-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </div>
-            </div>
-
-            <div id="mobile-filter-panel" class="flex flex-col gap-4 p-4 pt-0 md:p-4 md:pt-4 md:max-h-none md:overflow-visible">
-                <div class="bg-blue-50 text-blue-700 text-[10px] px-3 py-1.5 rounded-lg border border-blue-100 font-bold flex items-center">
-                    <span class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span data-lang="liveSync">Live Sync Active (5 mins cache)</span>
-                    </span>
-                </div>
-
-                <div class="flex flex-col gap-2 border-b border-slate-100 pb-3">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400" data-lang="selYear">Select Year</span>
-                    <div class="grid grid-cols-4 gap-1.5 bg-slate-100 p-1 rounded-xl" id="year-selector">
-                        <button onclick="changeYear('2023')" id="btn-2023" class="py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800">2023</button>
-                        <button onclick="changeYear('2024')" id="btn-2024" class="py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800">2024</button>
-                        <button onclick="changeYear('2025')" id="btn-2025" class="py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800">2025</button>
-                        <button onclick="changeYear('2026')" id="btn-2026" class="py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800">2026</button>
-                    </div>
-                </div>
-
-                <div class="flex flex-col gap-2 border-b border-slate-100 pb-3">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400" data-lang="filterTitle">Data Filters</span>
-                    <div class="flex flex-col gap-2">
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide block mb-1" data-lang="filterDaerah">Daerah</label>
-                            <select id="filter-daerah" onchange="handleFilterChange()" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl p-2 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none transition"></select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide block mb-1" data-lang="filterType">Classification Type</label>
-                            <select id="filter-type" onchange="handleFilterChange()" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl p-2 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none transition"></select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide block mb-1" data-lang="filterPic">PR PIC Person</label>
-                            <select id="filter-pic" onchange="handleFilterChange()" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl p-2 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none transition"></select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wide block mb-1" data-lang="filterAudit">Audit Status</label>
-                            <select id="filter-audit" onchange="handleFilterChange()" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl p-2 font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none transition"></select>
-                        </div>
-                        <button onclick="resetFilters()" id="btn-reset-filters" class="hidden text-[11px] font-bold text-rose-600 hover:text-rose-700 text-right mt-1 self-end bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100 transition shadow-sm">✕ Reset Filters</button>
-                    </div>
-                </div>
-
-                <div class="flex flex-col gap-2">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400" data-lang="selView">Select View</span>
-                    <div class="block md:hidden relative">
-                        <select id="month-dropdown" onchange="changeMonth(this.value)" class="w-full bg-slate-100 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-blue-500 block p-3 font-bold appearance-none shadow-sm"></select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                    </div>
-                    <div class="hidden md:grid md:grid-cols-3 gap-2" id="month-track"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══ MAIN CONTENT ═══ -->
-        <div class="flex-grow w-full flex flex-col gap-6 print-w-full">
-            <div class="relative print-hide">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <input type="text" id="search-input" onkeyup="triggerSearch()" class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-medium shadow-sm transition" placeholder="Search Church / Daerah..." data-placeholder="searchPlaceholder">
-            </div>
-
-            <section id="search-results-section" class="hidden flex flex-col gap-3">
-                <div class="flex justify-between items-center px-1 border-b border-slate-200 pb-2">
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-blue-600" data-lang="searchResults">Search Results</h2>
-                    <button onclick="clearSearch()" class="text-xs font-bold text-slate-400 hover:text-slate-600" data-lang="clearSearch">Clear ✕</button>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-3" id="search-results-container"></div>
-            </section>
-
-            <div id="standard-dashboard" class="flex flex-col gap-6">
-
-                <!-- Executive Summary -->
-                <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4 print-break-avoid" id="summary-section">
-                    <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
-                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500" data-lang="summaryTitle">Executive Summary</h3>
-                        <span class="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold border border-blue-100">Live Analysis</span>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="summary-cards-container">
-                        <div class="animate-pulse h-20 bg-slate-100 rounded-xl w-full"></div>
-                        <div class="animate-pulse h-20 bg-slate-100 rounded-xl w-full"></div>
-                        <div class="animate-pulse h-20 bg-slate-100 rounded-xl w-full"></div>
-                    </div>
-                </section>
-
-                <!-- Wilayah Grid -->
-                <section class="flex flex-col gap-3">
-                    <div class="flex justify-between items-center px-1">
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500" id="dashboard-title">Wilayah Dashboard</h2>
-                        <span class="text-xs font-bold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-100" id="global-percentage">0% Done</span>
-                    </div>
-                    <div id="loader" class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-3 w-full print-hide">
-                        <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p class="text-xs text-slate-400 font-medium animate-pulse" data-lang="fetching">Fetching live data...</p>
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 hidden" id="wilayah-grid"></div>
-                </section>
-
-                <!-- Comparison Bars -->
-                <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4 hidden print-break-avoid print-shadow-none" id="comparison-graph-section">
-                    <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
-                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500" data-lang="compTitle">Submission Comparison</h3>
-                        <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-semibold" data-lang="compSub">Wilayah vs. Wilayah</span>
-                    </div>
-                    <div id="comparison-bars-container" class="flex flex-col gap-3 mt-1"></div>
-                </section>
-
-            </div>
-        </div>
-    </main>
-
-    <footer class="main-footer w-full text-center flex flex-col gap-1 text-[11px] font-medium text-slate-400 py-8 border-t border-slate-200/50 mt-12 bg-slate-100/50 print-hide">
-        <p>Sabah Mission — Finance Department &copy; <span id="footer-year">2026</span></p>
-        <p id="live-timestamp-footer" class="font-bold text-slate-500"></p>
-    </footer>
-
-    <!-- ═══ DEEP DIVE MODAL ═══ -->
-    <div id="deep-dive-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300 print-hide">
-        <div class="bg-slate-50 w-full max-w-4xl max-h-[90vh] sm:max-h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="deep-dive-content">
-            <div class="bg-slate-800 text-white px-5 py-4 flex justify-between items-center shrink-0 shadow-md z-10">
-                <h3 class="text-sm md:text-base font-bold uppercase tracking-widest" id="deep-dive-title">Deep-Dive Status</h3>
-                <div class="flex items-center gap-2">
-                    <button onclick="printWilayahReport()" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                        <span data-lang="printBtn">Print Report</span>
-                    </button>
-                    <button onclick="closeDeepDiveModal()" class="text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-600 rounded-full w-8 h-8 flex items-center justify-center transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-            </div>
-            <div class="overflow-y-auto modal-scroll p-4 md:p-6 flex-grow bg-slate-50">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="church-cards-container"></div>
-            </div>
-        </div>
+<!-- Debug Modal -->
+<div id="debugModal">
+  <div style="width:100%;max-width:900px;margin:0 auto;background:#0c1a2e;border:1px solid rgba(239,68,68,.3);border-radius:16px;padding:28px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 style="font-size:18px;font-weight:800;color:#fca5a5">🐞 TNO Diagnostic Report</h2>
+      <div style="display:flex;gap:8px">
+        <button onclick="copyDebug()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#4ade80;border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;font-weight:700;font-size:12px">📋 Copy</button>
+        <button onclick="document.getElementById('debugModal').style.display='none'" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;font-weight:700;font-size:12px">✕ Close</button>
+      </div>
     </div>
+    <div id="debugContent"></div>
+  </div>
+</div>
 
-    <!-- ═══ TOAST NOTIFICATION ═══ -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] bg-slate-900 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg hidden opacity-0 transition-all duration-300 print-hide"></div>
-
-    <!-- ═══ DEBUG MODAL ═══ -->
-    <div id="debug-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300 print-hide">
-        <div class="bg-slate-50 w-full max-w-5xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="debug-modal-content">
-            <div class="bg-slate-800 text-white px-5 py-4 flex justify-between items-center shrink-0 shadow-md z-10">
-                <h3 class="text-sm font-bold uppercase tracking-widest">Debug Panel</h3>
-                <div class="flex items-center gap-2">
-                    <button onclick="copyDebugReport()" class="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                        <span>Copy Report</span>
-                    </button>
-                    <button onclick="closeDebugPanel()" class="text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-600 rounded-full w-8 h-8 flex items-center justify-center transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-            </div>
-            <div class="overflow-y-auto modal-scroll p-4 md:p-6 flex-grow bg-slate-900">
-                <pre id="debug-content" class="text-xs font-mono text-green-400 overflow-x-auto whitespace-pre-wrap leading-relaxed"></pre>
-            </div>
-        </div>
+<!-- Chat Widget -->
+<div id="chatWidget">
+  <button id="chatFloatingBtn" onclick="toggleChat()" title="Ask about TNO data">🧠</button>
+  <div id="chatPanel">
+    <div id="chatHeader">
+      <div class="title"><span>🧠</span> TNO Assistant</div>
+      <button class="close-btn" onclick="toggleChat()">✕</button>
     </div>
-
-    <!-- ═══ AI CHAT ═══ -->
-    <div id="ai-chat-wrapper" class="fixed bottom-6 right-6 z-50 print-hide flex flex-col items-end">
-        <!-- Chat panel -->
-        <div id="ai-chat-panel" class="hidden mb-3 w-80 sm:w-96 bg-white rounded-2xl border border-slate-200 flex flex-col overflow-hidden transition-all duration-200" style="max-height: 480px; height: 480px;">
-            <!-- Header -->
-            <div class="bg-blue-600 text-white px-4 py-3 flex justify-between items-center shrink-0">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    <span class="text-sm font-bold">Data Assistant</span>
-                </div>
-                <button onclick="toggleChat()" class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full w-7 h-7 flex items-center justify-center transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <!-- Messages -->
-            <div id="chat-messages" class="flex-grow overflow-y-auto p-4 flex flex-col gap-3 bg-slate-50/50"></div>
-            <!-- Input -->
-            <div class="shrink-0 border-t border-slate-200 bg-white p-3 flex gap-2">
-                <input id="chat-input" type="text" placeholder="Ask about the data..." onkeydown="if(event.key==='Enter') sendChatMessage()" class="flex-grow bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
-                <button onclick="sendChatMessage()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-3 py-2 text-xs font-bold transition shadow-sm flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19V5m0 0l-7 7m7-7l7 7"></path></svg>
-                </button>
-            </div>
-        </div>
-        <!-- Bubble button -->
-        <button id="ai-chat-bubble" onclick="toggleChat()" class="w-14 h-14 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 border-2 border-white/20">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-        </button>
+    <div id="chatMessages">
+      <div class="chat-msg chat-bot">
+        👋 Hi! I can answer questions about the TNO report data.<br><br>
+        <strong>Try asking:</strong><br>
+        • "How many churches in Wilayah 2?"<br>
+        • "Which are pending for March?"<br>
+        • "Show me SDA Likas"<br>
+        • "What is the submission rate?"<br>
+        • "Who is PIC for Wilayah 4?"<br>
+        • "Type <strong>help</strong> for more."
+      </div>
     </div>
-
-    <script>
-        // ── Configuration ──────────────────────────────────────────────────────────
-        const SPREADSHEET_BASE_ID = '1x3GOISJ6VrvytCil-l_INYRK0HU_s_vf6U1Y2Lpzd8A';
-        const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-        const viewOptions = [...months, 'FULL YEAR'];
-
-        let currentYear = '';
-        let currentMonth = '';
-        let rawSheetData = [];
-        let selectedWilayah = null;
-        let currentLanguage = 'en';
-        let mobileFiltersOpen = false;
-
-        let validYearsArray = [];
-        const actualCalendarYear = new Date().getFullYear().toString();
-        const actualPreviousYear = (new Date().getFullYear() - 1).toString();
-        const actualCurrentMonth = months[new Date().getMonth()];
-        let summaryMetrics = null;
-
-        let currentDeepDiveWilayah = null;
-        let currentDeepDiveStats = null;
-
-        let selDaerah = 'ALL', selType = 'ALL', selPic = 'ALL', selAudit = 'ALL';
-
-        // ── Debug log ──────────────────────────────────────────────────────────────
-        const debugLog = [];
-        function logDebug(msg, data) {
-            debugLog.push({ ts: new Date().toISOString(), msg: msg, data: data ? String(data).slice(0, 500) : undefined });
-            if (debugLog.length > 100) debugLog.shift();
-        }
-
-        // ── Toast helper ───────────────────────────────────────────────────────────
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.remove('hidden', 'opacity-0');
-            t.classList.add('opacity-100');
-            clearTimeout(t._hide);
-            t._hide = setTimeout(() => {
-                t.classList.add('opacity-0');
-                t.classList.add('hidden');
-            }, 2500);
-        }
-
-        // ── Cache helpers (F1) ─────────────────────────────────────────────────────
-        const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-        function cacheGet(sheetName) {
-            try {
-                const raw = sessionStorage.getItem('tnocache_' + sheetName);
-                if (!raw) return null;
-                const item = JSON.parse(raw);
-                if (Date.now() - item.ts > CACHE_TTL) {
-                    sessionStorage.removeItem('tnocache_' + sheetName);
-                    return null;
-                }
-                return item.data;
-            } catch (e) { return null; }
-        }
-        function cacheSet(sheetName, data) {
-            try {
-                sessionStorage.setItem('tnocache_' + sheetName, JSON.stringify({ ts: Date.now(), data: data }));
-            } catch (e) { /* storage full, ignore */ }
-        }
-        function cacheClear() {
-            const keys = [];
-            for (let i = 0; i < sessionStorage.length; i++) {
-                const k = sessionStorage.key(i);
-                if (k && k.startsWith('tnocache_')) keys.push(k);
-            }
-            keys.forEach(k => sessionStorage.removeItem(k));
-        }
-
-        // ── Sheet URL helper (F5) ──────────────────────────────────────────────────
-        function sheetUrl(sheetName) {
-            return `https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${sheetName}&t=${Date.now()}`;
-        }
-
-        // ── Cached sheet fetch (F1+F5) ─────────────────────────────────────────────
-        async function fetchSheetCached(sheetName) {
-            const cached = cacheGet(sheetName);
-            if (cached) {
-                logDebug('Cache hit', sheetName);
-                return cached;
-            }
-            logDebug('Cache miss, fetching', sheetName);
-            const res = await fetch(sheetUrl(sheetName));
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const text = await res.text();
-            const data = parseCsvToArray(text);
-            if (data.length > 0) cacheSet(sheetName, data);
-            return data;
-        }
-
-        // ── Helpers ────────────────────────────────────────────────────────────────
-        function isSubmittedStatus(s) {
-            if (!s) return false;
-            const t = s.toLowerCase().trim();
-            return t.includes('submit') || t.includes('receiv');
-        }
-
-        function isAuditedStatus(s) {
-            if (!s || s === '-') return false;
-            const t = s.toLowerCase().trim();
-            return t.includes('done') || t.includes('audit') || t.includes('complet') ||
-                   t.includes('yes') || t.includes('verif') || t.includes('finish');
-        }
-
-        function toggleMobileFilters() {
-            mobileFiltersOpen = !mobileFiltersOpen;
-            document.getElementById('mobile-filter-panel').classList.toggle('open', mobileFiltersOpen);
-            document.getElementById('mobile-filter-chevron').style.transform = mobileFiltersOpen ? 'rotate(180deg)' : '';
-        }
-
-        function updateMobileFilterBadge() {
-            const active = (selDaerah !== 'ALL' || selType !== 'ALL' || selPic !== 'ALL' || selAudit !== 'ALL');
-            document.getElementById('mobile-filter-badge').classList.toggle('hidden', !active);
-        }
-
-        // ── Language dictionary ────────────────────────────────────────────────────
-        const dict = {
-            en: {
-                title: 'TNO Report Submission Status',
-                subtitle: 'SABAH MISSION — FINANCE DEPARTMENT',
-                liveSync: 'Live Sync Active (5 mins cache)',
-                selYear: 'Select Year', selView: 'Select View',
-                filterTitle: 'Data Filters', filterDaerah: 'Daerah Location',
-                filterType: 'Classification Type', filterPic: 'PR PIC Person',
-                filterAudit: 'Audit Status',
-                searchPlaceholder: 'Search Church / Daerah...',
-                searchResults: 'Search Results', clearSearch: 'Clear ✕',
-                dashTitle: 'Wilayah Dashboard',
-                compTitle: 'Submission Comparison', compSub: 'Wilayah vs. Wilayah',
-                deepTitle: 'Deep-Dive Status',
-                printBtn: 'Print Report',
-                refreshBtn: 'Refresh',
-                fetching: 'Fetching live data from Google Sheets...',
-                status_as_of: 'Status as of:',
-                pending: 'Pending', submitted: 'Submitted', received: 'Received',
-                all_in: '✨ All In!', full_year: 'FULL YEAR',
-                full_year_lbl: '📊 Full Year Overview',
-                annual_view: 'Annual View', annual_audit: 'Annual Audit View',
-                summaryTitle: 'Executive Summary',
-                sum_prev_title: 'Pending (' + actualPreviousYear + ')',
-                sum_prev_sub: 'Of total year expectations',
-                sum_curr_title: 'Pending (' + actualCurrentMonth + ' ' + actualCalendarYear + ')',
-                sum_curr_sub: 'Churches yet to submit',
-                sum_sub_title: 'Submitted (' + actualCurrentMonth + ' ' + actualCalendarYear + ')',
-                sum_sub_sub: 'Churches submitted this month'
-            },
-            bm: {
-                title: 'Status Penyerahan Laporan TNO',
-                subtitle: 'MISSION SABAH — JABATAN KEWANGAN',
-                liveSync: 'Penyegerakan Aktif (5 min cache)',
-                selYear: 'Pilih Tahun', selView: 'Pilih Paparan',
-                filterTitle: 'Penapis Data', filterDaerah: 'Kawasan Daerah',
-                filterType: 'Jenis Klasifikasi', filterPic: 'Pegawai PR PIC',
-                filterAudit: 'Status Audit',
-                searchPlaceholder: 'Cari Gereja / Daerah...',
-                searchResults: 'Hasil Carian', clearSearch: 'Padam ✕',
-                dashTitle: 'Papan Pemuka Wilayah',
-                compTitle: 'Perbandingan Penyerahan', compSub: 'Wilayah vs. Wilayah',
-                deepTitle: 'Status Terperinci',
-                printBtn: 'Cetak Laporan',
-                refreshBtn: 'Muat Semula',
-                fetching: 'Mengambil data langsung dari Google Sheets...',
-                status_as_of: 'Status setakat:',
-                pending: 'Tertunggak', submitted: 'Dihantar', received: 'Diterima',
-                all_in: '✨ Selesai!', full_year: 'SEPANJANG TAHUN',
-                full_year_lbl: '📊 Gambaran Keseluruhan Tahunan',
-                annual_view: 'Paparan Tahunan', annual_audit: 'Paparan Audit Tahunan',
-                summaryTitle: 'Ringkasan Eksekutif',
-                sum_prev_title: 'Laporan Tertunggak (' + actualPreviousYear + ')',
-                sum_prev_sub: 'Daripada jangkaan tahunan',
-                sum_curr_title: 'Tertunggak (' + actualCurrentMonth + ' ' + actualCalendarYear + ')',
-                sum_curr_sub: 'Gereja belum menghantar',
-                sum_sub_title: 'Dihantar (' + actualCurrentMonth + ' ' + actualCalendarYear + ')',
-                sum_sub_sub: 'Gereja telah menghantar bulan ini'
-            }
-        };
-
-        function getText(key) { return dict[currentLanguage][key] || key; }
-
-        function changeLang(lang) {
-            currentLanguage = lang;
-            document.getElementById('lang-en').className = lang === 'en'
-                ? 'px-3 py-1 text-xs font-bold rounded-md bg-white text-blue-700 transition shadow-sm border border-slate-200/50'
-                : 'px-3 py-1 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800 transition';
-            document.getElementById('lang-bm').className = lang === 'bm'
-                ? 'px-3 py-1 text-xs font-bold rounded-md bg-white text-blue-700 transition shadow-sm border border-slate-200/50'
-                : 'px-3 py-1 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800 transition';
-            document.querySelectorAll('[data-lang]').forEach(el => {
-                const k = el.getAttribute('data-lang');
-                if (dict[currentLanguage][k]) el.innerText = dict[currentLanguage][k];
-            });
-            document.querySelectorAll('[data-placeholder]').forEach(el => {
-                const k = el.getAttribute('data-placeholder');
-                if (dict[currentLanguage][k]) el.placeholder = dict[currentLanguage][k];
-            });
-            updateTimestamp();
-            renderMonthSelectors();
-            renderSummaryCards();
-            if (rawSheetData.length > 0) { calculateAndRenderUI(); handleSearch(); }
-        }
-
-        function updateTimestamp() {
-            const txt = getText('status_as_of') + ' ' + new Date().toLocaleString();
-            document.getElementById('live-timestamp-footer').innerText = txt;
-            document.getElementById('print-timestamp').innerText = txt;
-        }
-
-        document.getElementById('deep-dive-modal').addEventListener('click', function(e) {
-            if (e.target === this) closeDeepDiveModal();
-        });
-        document.getElementById('debug-modal').addEventListener('click', function(e) {
-            if (e.target === this) closeDebugPanel();
-        });
-
-        // ── Search debounce (F3) ───────────────────────────────────────────────────
-        let searchTimeout = null;
-        function triggerSearch() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(handleSearch, 200);
-        }
-
-        // ── Init ───────────────────────────────────────────────────────────────────
-        async function initApp() {
-            setupYearSelectionBinding();
-            currentYear = actualCalendarYear;
-            document.getElementById('footer-year').innerText = currentYear;
-            if (!validYearsArray.includes(currentYear))
-                currentYear = validYearsArray.length > 0 ? validYearsArray[validYearsArray.length - 1] : '2026';
-            currentMonth = actualCurrentMonth;
-            updateTimestamp();
-            updateYearSelectorsUI();
-            renderMonthSelectors();
-
-            // Load sheet data first, then summary (F2 — avoids duplicate fetch)
-            await loadSheetFeed();
-            await loadSummaryStats();
-        }
-
-        function renderMonthSelectors() {
-            const track = document.getElementById('month-track');
-            const dropdown = document.getElementById('month-dropdown');
-            track.innerHTML = ''; dropdown.innerHTML = '';
-            viewOptions.forEach(optVal => {
-                const isActive = optVal === currentMonth;
-                const isFullYear = optVal === 'FULL YEAR';
-                const btn = document.createElement('button');
-                const extra = isFullYear ? 'col-span-3 bg-slate-800 text-white hover:bg-slate-700 mt-2' : '';
-                btn.className = 'px-2 py-2 text-xs font-bold rounded-xl transition-all duration-200 text-center w-full ' + extra + ' ' +
-                    (isActive && !isFullYear ? 'bg-blue-600 text-white shadow-md shadow-blue-100' :
-                    isActive && isFullYear  ? 'bg-blue-600 text-white shadow-md' :
-                    !extra ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : '');
-                btn.innerText = isFullYear ? getText('full_year') : optVal;
-                btn.onclick = () => changeMonth(optVal);
-                track.appendChild(btn);
-                const opt = document.createElement('option');
-                opt.value = optVal;
-                opt.innerText = isFullYear ? getText('full_year_lbl') + ' (' + currentYear + ')' : optVal + ' ' + currentYear;
-                if (isActive) opt.selected = true;
-                dropdown.appendChild(opt);
-            });
-        }
-
-        function parseCsvToArray(text) {
-            const lines = text.split('\n');
-            if (lines.length < 2) return [];
-            const data = [];
-            for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
-                if (cols.length < 4 || !cols[0]) continue;
-                const row = {
-                    wilayah: cols[0], daerah: cols[1] || '-', gereja: cols[2] || 'Unnamed',
-                    type: cols[3] || 'General', prPic: cols[4] || '-', audit: cols[5] || '-', months: {}
-                };
-                months.forEach((m, idx) => {
-                    row.months[m] = isSubmittedStatus(cols[6 + idx]) ? 'Submitted' : 'Pending';
-                });
-                data.push(row);
-            }
-            logDebug('Parsed CSV rows', data.length);
-            return data;
-        }
-
-        function buildFilterDropdowns() {
-            const daerahs = new Set(), types = new Set(), pics = new Set(), audits = new Set();
-            rawSheetData.forEach(r => {
-                if (r.daerah && r.daerah !== '-') daerahs.add(r.daerah);
-                if (r.type  && r.type  !== '-') types.add(r.type);
-                if (r.prPic && r.prPic !== '-') pics.add(r.prPic);
-                if (r.audit && r.audit !== '-') audits.add(r.audit);
-            });
-            populateSelectElement('filter-daerah', daerahs, selDaerah);
-            populateSelectElement('filter-type',   types,   selType);
-            populateSelectElement('filter-pic',    pics,    selPic);
-            populateSelectElement('filter-audit',  audits,  selAudit);
-            document.getElementById('btn-reset-filters').classList.toggle('hidden',
-                selDaerah === 'ALL' && selType === 'ALL' && selPic === 'ALL' && selAudit === 'ALL');
-        }
-
-        function populateSelectElement(id, optionSet, activeValue) {
-            const sel = document.getElementById(id);
-            sel.innerHTML = '<option value="ALL">All values</option>';
-            Array.from(optionSet).sort().forEach(val => {
-                const o = document.createElement('option');
-                o.value = val; o.innerText = val;
-                if (val === activeValue) o.selected = true;
-                sel.appendChild(o);
-            });
-        }
-
-        function handleFilterChange() {
-            selDaerah = document.getElementById('filter-daerah').value;
-            selType   = document.getElementById('filter-type').value;
-            selPic    = document.getElementById('filter-pic').value;
-            selAudit  = document.getElementById('filter-audit').value;
-            document.getElementById('btn-reset-filters').classList.toggle('hidden',
-                selDaerah === 'ALL' && selType === 'ALL' && selPic === 'ALL' && selAudit === 'ALL');
-            updateMobileFilterBadge();
-            if (rawSheetData.length > 0) { calculateAndRenderUI(); handleSearch(); }
-        }
-
-        function resetFilters() {
-            selDaerah = selType = selPic = selAudit = 'ALL';
-            ['filter-daerah','filter-type','filter-pic','filter-audit'].forEach(id => document.getElementById(id).value = 'ALL');
-            document.getElementById('btn-reset-filters').classList.add('hidden');
-            updateMobileFilterBadge();
-            calculateAndRenderUI(); handleSearch();
-        }
-
-        function itemPassesFilters(item) {
-            if (selDaerah !== 'ALL' && item.daerah !== selDaerah) return false;
-            if (selType   !== 'ALL' && item.type   !== selType)   return false;
-            if (selPic    !== 'ALL' && item.prPic   !== selPic)    return false;
-            if (selAudit  !== 'ALL' && item.audit   !== selAudit)  return false;
-            return true;
-        }
-
-        // ── Summary Stats (F2 + F6) ──────────────────────────────────────────────
-        async function loadSummaryStats() {
-            try {
-                let prevData = null, currData = null;
-
-                try {
-                    prevData = await fetchSheetCached(actualPreviousYear);
-                } catch (e) {
-                    logDebug('Summary: prev year fetch failed', actualPreviousYear + ' ' + e.message);
-                }
-
-                // Reuse rawSheetData if it matches current calendar year (F2)
-                if (currentYear === actualCalendarYear && rawSheetData.length > 0) {
-                    currData = rawSheetData;
-                    logDebug('Summary: reusing rawSheetData for current year');
-                } else {
-                    try {
-                        currData = await fetchSheetCached(actualCalendarYear);
-                    } catch (e) {
-                        logDebug('Summary: curr year fetch failed', actualCalendarYear + ' ' + e.message);
-                    }
-                }
-
-                // Card 1 — previous year pending %
-                let prevYearPendingPercent = null;
-                if (prevData && prevData.length > 0) {
-                    let pTotal = 0, pPending = 0;
-                    prevData.forEach(c => { months.forEach(m => { pTotal++; if (c.months[m] !== 'Submitted') pPending++; }); });
-                    prevYearPendingPercent = pTotal > 0 ? Math.round((pPending / pTotal) * 100) : 0;
-                }
-
-                // Card 2 — current month pending %
-                let currMonthPendingPercent = null;
-                let currSubmitted = 0, currTotal = 0, currSubmittedPercent = null;
-                if (currData && currData.length > 0) {
-                    currTotal = currData.length;
-                    let cpending = 0;
-                    currData.forEach(c => { if (c.months[actualCurrentMonth] !== 'Submitted') cpending++; });
-                    currMonthPendingPercent = currTotal > 0 ? Math.round((cpending / currTotal) * 100) : 0;
-                    currSubmitted = currTotal - cpending;
-                    currSubmittedPercent = currTotal > 0 ? Math.round((currSubmitted / currTotal) * 100) : 0;
-                }
-
-                summaryMetrics = { prevYearPendingPercent, currMonthPendingPercent, currSubmitted, currTotal, currSubmittedPercent };
-                renderSummaryCards();
-            } catch (e) {
-                logDebug('Summary stats error', e.message);
-            }
-        }
-
-        function renderSummaryCards() {
-            const container = document.getElementById('summary-cards-container');
-            if (!summaryMetrics) {
-                container.innerHTML =
-                    '<p class="text-xs font-bold text-red-500 col-span-3 text-center py-4">Executive analytics overview currently unavailable.</p>';
-                return;
-            }
-            const { prevYearPendingPercent, currMonthPendingPercent, currSubmitted, currTotal, currSubmittedPercent } = summaryMetrics;
-
-            // Card 1 — previous year
-            let card1;
-            if (prevYearPendingPercent !== null) {
-                card1 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">' +
-                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_prev_title') + '</span>' +
-                    '<span class="text-2xl font-black ' + (prevYearPendingPercent > 0 ? 'text-rose-600' : 'text-emerald-600') + '">' + prevYearPendingPercent + '%</span>' +
-                    '<span class="text-[10px] text-slate-500 font-medium">' + getText('sum_prev_sub') + '</span></div>';
-            } else {
-                card1 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm opacity-60">' +
-                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_prev_title') + '</span>' +
-                    '<span class="text-lg font-black text-slate-400">—</span>' +
-                    '<span class="text-[10px] text-slate-400 font-medium">Data unavailable</span></div>';
-            }
-
-            // Card 2 — current month pending
-            let card2;
-            if (currMonthPendingPercent !== null) {
-                card2 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">' +
-                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_curr_title') + '</span>' +
-                    '<span class="text-2xl font-black ' + (currMonthPendingPercent > 0 ? 'text-rose-600' : 'text-emerald-600') + '">' + currMonthPendingPercent + '%</span>' +
-                    '<span class="text-[10px] text-slate-500 font-medium">' + getText('sum_curr_sub') + '</span></div>';
-            } else {
-                card2 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm opacity-60">' +
-                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_curr_title') + '</span>' +
-                    '<span class="text-lg font-black text-slate-400">—</span>' +
-                    '<span class="text-[10px] text-slate-400 font-medium">Data unavailable</span></div>';
-            }
-
-            // Card 3 — current month submitted
-            let card3;
-            if (currSubmittedPercent !== null) {
-                card3 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm">' +
-                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_sub_title') + '</span>' +
-                    '<span class="text-2xl font-black text-emerald-600">' + currSubmittedPercent + '%</span>' +
-                    '<span class="text-[10px] text-slate-500 font-medium">' + currSubmitted + ' / ' + currTotal + ' · ' + getText('sum_sub_sub') + '</span></div>';
-            } else {
-                card3 = '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-1 shadow-sm opacity-60">' +
-                    '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">' + getText('sum_sub_title') + '</span>' +
-                    '<span class="text-lg font-black text-slate-400">—</span>' +
-                    '<span class="text-[10px] text-slate-400 font-medium">Data unavailable</span></div>';
-            }
-
-            container.innerHTML = card1 + card2 + card3;
-        }
-
-        // ── Sheet feed (F1 + F5) ──────────────────────────────────────────────────
-        async function loadSheetFeed() {
-            showLoader(true);
-            try {
-                rawSheetData = await fetchSheetCached(currentYear);
-                logDebug('Sheet feed loaded', currentYear + ' — ' + rawSheetData.length + ' rows');
-                updateTimestamp();
-                buildFilterDropdowns();
-                calculateAndRenderUI();
-            } catch (e) {
-                logDebug('Sheet feed error', e.message);
-                document.getElementById('loader').innerHTML =
-                    '<p class="text-xs font-bold text-red-500">Failed to sync live data feed. ' + e.message + '</p>';
-            }
-        }
-
-        function calculateAndRenderUI() {
-            showLoader(false);
-            const viewText = currentMonth === 'FULL YEAR' ? getText('annual_view') : currentMonth;
-            document.getElementById('dashboard-title').innerText = getText('dashTitle') + ' (' + viewText + ' ' + currentYear + ')';
-
-            const wilayahMap = {};
-            let totalChurches = 0, totalSubmitted = 0;
-
-            rawSheetData.forEach(item => {
-                if (!itemPassesFilters(item)) return;
-                const w = item.wilayah; if (!w) return;
-                if (!wilayahMap[w]) wilayahMap[w] = { total: 0, submitted: 0, data: [] };
-                if (currentMonth === 'FULL YEAR') {
-                    wilayahMap[w].total += 12; totalChurches += 12;
-                    months.forEach(m => { if (item.months[m] === 'Submitted') { wilayahMap[w].submitted++; totalSubmitted++; } });
-                } else {
-                    wilayahMap[w].total++; totalChurches++;
-                    if ((item.months[currentMonth] || 'Pending') === 'Submitted') { wilayahMap[w].submitted++; totalSubmitted++; }
-                }
-                wilayahMap[w].data.push(item);
-            });
-
-            document.getElementById('global-percentage').innerText =
-                (totalChurches > 0 ? Math.round((totalSubmitted / totalChurches) * 100) : 0) + '% Done';
-
-            const grid = document.getElementById('wilayah-grid');
-            const graph = document.getElementById('comparison-bars-container');
-            grid.innerHTML = ''; graph.innerHTML = '';
-            document.getElementById('comparison-graph-section').classList.remove('hidden');
-
-            if (Object.keys(wilayahMap).length === 0) {
-                grid.innerHTML = '<div class="col-span-full text-center py-6 text-slate-400 text-xs font-medium">No results match selected filter criteria.</div>';
-                return;
-            }
-
-            Object.keys(wilayahMap).sort((a,b) => a.localeCompare(b, undefined, {numeric:true})).forEach(w => {
-                const stats = wilayahMap[w];
-                const pct = stats.total > 0 ? Math.round((stats.submitted / stats.total) * 100) : 0;
-                const pending = stats.total - stats.submitted;
-
-                const card = document.createElement('div');
-                card.className = 'relative bg-white p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center text-center gap-3 hover:shadow-md cursor-pointer print-shadow-none print-break-avoid ' +
-                    (selectedWilayah === w ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/10' : 'border-slate-100 shadow-sm hover:border-slate-300');
-
-                const badge = pending > 0
-                    ? '<div class="absolute -top-2.5 -right-2.5 bg-rose-500 text-white text-[11px] font-extrabold min-w-[24px] h-6 px-1 flex items-center justify-center rounded-full shadow-md border-2 border-white z-10 print-hide">' + pending + '</div>' : '';
-                const remainRing = pct === 100 ? 'text-slate-100' : 'text-rose-500';
-
-                card.innerHTML = badge +
-                    '<span class="text-xs font-bold text-slate-700">Wilayah ' + w + '</span>' +
-                    '<div class="relative w-16 h-16 flex items-center justify-center">' +
-                        '<svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">' +
-                            '<path class="' + remainRing + ' transition-colors duration-300" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>' +
-                            '<path class="stroke-emerald-500 transition-all duration-500" stroke-dasharray="' + pct + ', 100" stroke-width="3" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>' +
-                        '</svg>' +
-                        '<div class="absolute"><span class="text-xs font-bold text-slate-900">' + pct + '%</span></div>' +
-                    '</div>' +
-                    '<div class="flex flex-col">' +
-                        '<span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">' + stats.submitted + '/' + stats.total + ' ' + getText('received') + '</span>' +
-                        (pct === 100 ? '<span class="text-[9px] font-bold text-emerald-600 mt-0.5">' + getText('all_in') + '</span>' : '') +
-                    '</div>';
-                card.onclick = () => { selectedWilayah = w; calculateAndRenderUI(); renderDeepDive(w, stats); openDeepDiveModal(); };
-                grid.appendChild(card);
-
-                const barRow = document.createElement('div');
-                barRow.className = 'flex items-center gap-3 print-break-avoid';
-                barRow.innerHTML =
-                    '<span class="text-[11px] font-bold text-slate-600 w-16 shrink-0 text-right whitespace-nowrap">Wilayah ' + w + '</span>' +
-                    '<div class="w-full ' + (pct === 100 ? 'bg-slate-100' : 'bg-rose-500') + ' rounded-full h-3.5 overflow-hidden shadow-inner">' +
-                        '<div class="bg-emerald-500 h-full rounded-full transition-all duration-1000 ease-out" style="width:' + pct + '%"></div>' +
-                    '</div>' +
-                    '<span class="text-[11px] font-bold text-slate-800 w-10 shrink-0">' + pct + '%</span>';
-                graph.appendChild(barRow);
-            });
-        }
-
-        // ── Search ────────────────────────────────────────────────────────────────
-        function clearSearch() { document.getElementById('search-input').value = ''; handleSearch(); }
-
-        function handleSearch() {
-            const q = document.getElementById('search-input').value.toLowerCase().trim();
-            const stdDash = document.getElementById('standard-dashboard');
-            const srcDash = document.getElementById('search-results-section');
-            const container = document.getElementById('search-results-container');
-            if (!q) { stdDash.classList.remove('hidden'); srcDash.classList.add('hidden'); return; }
-            stdDash.classList.add('hidden'); srcDash.classList.remove('hidden'); container.innerHTML = '';
-            const results = rawSheetData.filter(c => itemPassesFilters(c) && (
-                c.gereja.toLowerCase().includes(q) || c.daerah.toLowerCase().includes(q) ||
-                c.wilayah.toLowerCase().includes(q) || c.prPic.toLowerCase().includes(q)));
-            if (results.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400 text-sm font-medium">No churches found matching "' + q + '"</div>';
-                return;
-            }
-            results.forEach(c => {
-                const card = document.createElement('div');
-                card.className = 'bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-2 w-full';
-                card.innerHTML = buildChurchCardHtml(c, true);
-                container.appendChild(card);
-            });
-        }
-
-        // ── Church card HTML ──────────────────────────────────────────────────────
-        function buildChurchCardHtml(c, showLocationTags) {
-            let statusDisplay = '';
-            if (currentMonth === 'FULL YEAR') {
-                let grid = '';
-                months.forEach(m => {
-                    const ok = c.months[m] === 'Submitted';
-                    grid += '<div class="flex flex-col items-center justify-center py-1 rounded border ' + (ok ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700') + '"><span class="text-[8px] uppercase font-bold opacity-70">' + m + '</span><span class="text-[10px] md:text-xs">' + (ok ? '✓' : '✗') + '</span></div>';
-                });
-                statusDisplay = '<div class="grid grid-cols-6 lg:grid-cols-12 gap-1 w-full mt-1 border-t border-slate-100 pt-2">' + grid + '</div>';
-            } else {
-                const ok = (c.months[currentMonth] || 'Pending') === 'Submitted';
-                statusDisplay = '<div class="shrink-0"><span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded-lg ' + (ok ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-rose-50 text-rose-700 border border-rose-200/50') + '">' + (ok ? '🟢 ' + getText('submitted') : '🔴 ' + getText('pending')) + '</span></div>';
-            }
-            const extraTags = showLocationTags
-                ? '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-white tracking-wider">W' + c.wilayah + '</span><span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 tracking-wider">' + c.daerah + '</span>' : '';
-            const viewLabel = currentMonth !== 'FULL YEAR' ? currentMonth : getText('annual_audit');
-            const prBadge = c.prPic && c.prPic !== '-'
-                ? '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 border border-purple-100 tracking-wider truncate max-w-[90px]" title="' + c.prPic + '">👤 ' + c.prPic + '</span>' : '';
-            const auditBadge = c.audit && c.audit !== '-'
-                ? '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded ' + (isAuditedStatus(c.audit) ? 'bg-teal-50 text-teal-600 border border-teal-100' : 'bg-orange-50 text-orange-600 border border-orange-100') + ' tracking-wider truncate max-w-[90px]" title="' + c.audit + '">📋 ' + c.audit + '</span>' : '';
-            return '<div class="flex items-center justify-between w-full">' +
-                    '<div class="flex flex-col gap-0.5 min-w-0">' +
-                        '<span class="text-xs font-bold text-slate-800 truncate leading-tight">' + c.gereja + '</span>' +
-                        '<div class="flex items-center gap-1.5 mt-0.5 flex-wrap">' +
-                            extraTags +
-                            '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 tracking-wider">' + c.type + '</span>' +
-                            prBadge + auditBadge +
-                            (!showLocationTags ? '<span class="text-[10px] text-slate-400 font-medium">' + viewLabel + '</span>' : '') +
-                        '</div>' +
-                    '</div>' +
-                    (currentMonth !== 'FULL YEAR' ? statusDisplay : '') +
-                '</div>' +
-                (currentMonth === 'FULL YEAR' ? statusDisplay : '');
-        }
-
-        // ── Modal open / close ────────────────────────────────────────────────────
-        function openDeepDiveModal() {
-            const modal = document.getElementById('deep-dive-modal');
-            const content = document.getElementById('deep-dive-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeDeepDiveModal() {
-            const modal = document.getElementById('deep-dive-modal');
-            const content = document.getElementById('deep-dive-content');
-            modal.classList.add('opacity-0'); content.classList.add('scale-95');
-            setTimeout(() => { modal.classList.add('hidden'); selectedWilayah = null; calculateAndRenderUI(); }, 300);
-            document.body.style.overflow = '';
-        }
-
-        // ── Deep dive render ──────────────────────────────────────────────────────
-        function renderDeepDive(wilayahName, stats) {
-            currentDeepDiveWilayah = wilayahName;
-            currentDeepDiveStats   = stats;
-
-            const container = document.getElementById('church-cards-container');
-            const viewText  = currentMonth === 'FULL YEAR' ? getText('annual_view') : currentMonth;
-            document.getElementById('deep-dive-title').innerText = 'Wilayah ' + wilayahName + ' - ' + viewText;
-            container.innerHTML = '';
-
-            const daerahGroup = {};
-            stats.data.forEach(c => { if (!daerahGroup[c.daerah]) daerahGroup[c.daerah] = []; daerahGroup[c.daerah].push(c); });
-
-            Object.keys(daerahGroup).sort().forEach(daerahName => {
-                const list = daerahGroup[daerahName];
-                list.sort((a, b) => {
-                    if (currentMonth === 'FULL YEAR') {
-                        const pA = months.filter(m => a.months[m] !== 'Submitted').length;
-                        const pB = months.filter(m => b.months[m] !== 'Submitted').length;
-                        if (pA > 0 && pB === 0) return -1; if (pA === 0 && pB > 0) return 1;
-                        return a.gereja.localeCompare(b.gereja);
-                    }
-                    const sA = a.months[currentMonth] === 'Submitted' ? 1 : 0;
-                    const sB = b.months[currentMonth] === 'Submitted' ? 1 : 0;
-                    if (sA < sB) return -1; if (sA > sB) return 1;
-                    return a.gereja.localeCompare(b.gereja);
-                });
-
-                let done = 0, total = 0;
-                if (currentMonth === 'FULL YEAR') {
-                    list.forEach(c => { total += 12; months.forEach(m => { if (c.months[m] === 'Submitted') done++; }); });
-                } else {
-                    total = list.length;
-                    done  = list.filter(c => c.months[currentMonth] === 'Submitted').length;
-                }
-                const dpct = total > 0 ? Math.round((done / total) * 100) : 0;
-                const sid  = daerahName.replace(/[^a-zA-Z0-9]/g, '-');
-
-                const block = document.createElement('div');
-                block.className = 'flex flex-col gap-2 bg-slate-200/40 p-3 rounded-2xl border border-slate-200/60 h-fit';
-                block.innerHTML =
-                    '<div class="flex justify-between items-center px-1 border-b border-slate-300/50 pb-2 mb-1">' +
-                        '<span class="text-xs font-bold text-slate-800 tracking-wide">📂 DAERAH: ' + daerahName + '</span>' +
-                        '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ' + (dpct === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-300 text-slate-800') + '">' + dpct + '%</span>' +
-                    '</div>' +
-                    '<div class="flex flex-col gap-2" id="cards-list-' + sid + '"></div>';
-                container.appendChild(block);
-
-                const target = document.getElementById('cards-list-' + sid);
-                list.forEach(c => {
-                    const card = document.createElement('div');
-                    card.className = 'bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col gap-2 w-full';
-                    card.innerHTML = buildChurchCardHtml(c);
-                    target.appendChild(card);
-                });
-            });
-        }
-
-        // ── Wilayah Print (F4) ────────────────────────────────────────────────────
-        window.addEventListener('afterprint', function() {
-            document.body.classList.remove('wilayah-print-mode');
-        });
-
-        function printWilayahReport() {
-            if (!currentDeepDiveWilayah || !currentDeepDiveStats) return;
-
-            const wpTitle   = document.getElementById('wp-title');
-            const wpTS      = document.getElementById('wp-timestamp');
-            const wpContent = document.getElementById('wp-content');
-
-            wpTitle.innerText = 'Wilayah ' + currentDeepDiveWilayah + ' — Full Year Report (' + currentYear + ')';
-            wpTS.innerText    = getText('status_as_of') + ' ' + new Date().toLocaleString();
-            wpContent.innerHTML = '';
-
-            const daerahGroup = {};
-            currentDeepDiveStats.data.forEach(c => {
-                if (!daerahGroup[c.daerah]) daerahGroup[c.daerah] = [];
-                daerahGroup[c.daerah].push(c);
-            });
-
-            Object.keys(daerahGroup).sort().forEach(daerahName => {
-                const list = daerahGroup[daerahName];
-                list.sort((a, b) => a.gereja.localeCompare(b.gereja));
-
-                let done = 0;
-                list.forEach(c => { months.forEach(m => { if (c.months[m] === 'Submitted') done++; }); });
-                const total = list.length * 12;
-                const dpct  = total > 0 ? Math.round((done / total) * 100) : 0;
-
-                const block = document.createElement('div');
-                block.className = 'wp-break-avoid mb-6 border border-slate-200 rounded-xl overflow-hidden';
-                block.style.pageBreakInside = 'avoid';
-
-                const hdr = document.createElement('div');
-                hdr.style.cssText = 'background:#1e293b;color:white;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;';
-                hdr.innerHTML = '<span style="font-weight:700;font-size:12px;">📂 DAERAH: ' + daerahName + '</span><span style="font-size:11px;font-weight:700;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:999px;">' + dpct + '% Complete</span>';
-                block.appendChild(hdr);
-
-                const table = document.createElement('table');
-                table.style.cssText = 'width:100%;border-collapse:collapse;font-size:10px;';
-
-                const thead = document.createElement('thead');
-                let thHtml = '<tr style="background:#f8fafc;">';
-                thHtml += '<th style="text-align:left;padding:6px 10px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#475569;">Church</th>';
-                thHtml += '<th style="padding:6px 6px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#475569;">Type</th>';
-                thHtml += '<th style="padding:6px 6px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#475569;">Audit</th>';
-                months.forEach(m => {
-                    thHtml += '<th style="padding:6px 4px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#475569;text-align:center;">' + m + '</th>';
-                });
-                thHtml += '</tr>';
-                thead.innerHTML = thHtml;
-                table.appendChild(thead);
-
-                const tbody = document.createElement('tbody');
-                list.forEach((c, idx) => {
-                    const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
-                    let rowHtml = '<tr style="background:' + rowBg + ';">';
-                    rowHtml += '<td style="padding:5px 10px;border-bottom:1px solid #f1f5f9;font-weight:600;color:#1e293b;">' + c.gereja + '</td>';
-                    rowHtml += '<td style="padding:5px 6px;border-bottom:1px solid #f1f5f9;color:#64748b;text-align:center;">' + c.type + '</td>';
-                    const auditColor = isAuditedStatus(c.audit) ? '#0d9488' : '#f97316';
-                    rowHtml += '<td style="padding:5px 6px;border-bottom:1px solid #f1f5f9;color:' + auditColor + ';font-weight:700;text-align:center;">' + (c.audit !== '-' ? c.audit : '—') + '</td>';
-                    months.forEach(m => {
-                        const ok = c.months[m] === 'Submitted';
-                        rowHtml += '<td style="padding:5px 4px;border-bottom:1px solid #f1f5f9;text-align:center;color:' + (ok ? '#16a34a' : '#dc2626') + ';font-weight:700;">' + (ok ? '✓' : '✗') + '</td>';
-                    });
-                    rowHtml += '</tr>';
-                    tbody.innerHTML += rowHtml;
-                });
-                table.appendChild(tbody);
-                block.appendChild(table);
-                wpContent.appendChild(block);
-            });
-
-            document.body.classList.add('wilayah-print-mode');
-            window.print();
-            setTimeout(function() {
-                document.body.classList.remove('wilayah-print-mode');
-            }, 2000);
-        }
-
-        // ── Refresh data (N1) ──────────────────────────────────────────────────────
-        async function refreshData() {
-            const btn = document.getElementById('refresh-btn');
-            const icon = document.getElementById('refresh-icon');
-            btn.disabled = true;
-            icon.classList.add('animate-spin');
-            logDebug('Manual refresh triggered');
-
-            cacheClear();
-
-            rawSheetData = [];
-            await loadSheetFeed();
-            await loadSummaryStats();
-            showToast('Data refreshed!');
-
-            icon.classList.remove('animate-spin');
-            btn.disabled = false;
-        }
-
-        // ── Debug panel (N2) ──────────────────────────────────────────────────────
-        function openDebugPanel() {
-            const modal = document.getElementById('debug-modal');
-            const content = document.getElementById('debug-modal-content');
-            buildDebugReport();
-            modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeDebugPanel() {
-            const modal = document.getElementById('debug-modal');
-            const content = document.getElementById('debug-modal-content');
-            modal.classList.add('opacity-0'); content.classList.add('scale-95');
-            setTimeout(() => { modal.classList.add('hidden'); }, 300);
-            document.body.style.overflow = '';
-        }
-
-        function buildDebugReport() {
-            const el = document.getElementById('debug-content');
-
-            const filteredCount = rawSheetData.filter(c => itemPassesFilters(c)).length;
-            const wilayahCount = [...new Set(rawSheetData.map(c => c.wilayah))].length;
-
-            const lines = [];
-            lines.push('═══════════════════════════════════════════');
-            lines.push('  TNO REPORT — DEBUG DIAGNOSTIC REPORT');
-            lines.push('  Generated: ' + new Date().toISOString());
-            lines.push('═══════════════════════════════════════════');
-            lines.push('');
-            lines.push('── APP STATE ──────────────────────────────');
-            lines.push('  currentYear:        ' + currentYear);
-            lines.push('  currentMonth:       ' + currentMonth);
-            lines.push('  language:           ' + currentLanguage);
-            lines.push('  selDaerah:          ' + selDaerah);
-            lines.push('  selType:            ' + selType);
-            lines.push('  selPic:             ' + selPic);
-            lines.push('  selAudit:           ' + selAudit);
-            lines.push('  selectedWilayah:    ' + (selectedWilayah || 'none'));
-            lines.push('');
-            lines.push('── DATASET INFO ───────────────────────────');
-            lines.push('  sheet ID:           ' + SPREADSHEET_BASE_ID);
-            lines.push('  total raw records:  ' + rawSheetData.length);
-            lines.push('  after filters:      ' + filteredCount);
-            lines.push('  unique wilayah:     ' + wilayahCount);
-            lines.push('');
-            lines.push('── RAW DATA (JSON) ────────────────────────');
-            try {
-                const rawJson = JSON.stringify(rawSheetData, null, 2);
-                lines.push(rawJson);
-            } catch (e) {
-                lines.push('  [ERROR serializing data: ' + e.message + ']');
-            }
-            lines.push('');
-            lines.push('── FILTERED DATA ──────────────────────────');
-            try {
-                const filteredData = rawSheetData.filter(c => itemPassesFilters(c));
-                const filtJson = JSON.stringify(filteredData, null, 2);
-                lines.push(filtJson);
-            } catch (e) {
-                lines.push('  [ERROR: ' + e.message + ']');
-            }
-            lines.push('');
-            lines.push('── WILAYAH AGGREGATIONS ───────────────────');
-            try {
-                const map = {};
-                rawSheetData.forEach(c => {
-                    if (!itemPassesFilters(c)) return;
-                    if (!map[c.wilayah]) map[c.wilayah] = { total: 0, submitted: 0 };
-                    if (currentMonth === 'FULL YEAR') {
-                        map[c.wilayah].total += 12;
-                        months.forEach(m => { if (c.months[m] === 'Submitted') map[c.wilayah].submitted++; });
-                    } else {
-                        map[c.wilayah].total++;
-                        if ((c.months[currentMonth] || 'Pending') === 'Submitted') map[c.wilayah].submitted++;
-                    }
-                });
-                Object.keys(map).sort().forEach(w => {
-                    const s = map[w];
-                    const p = s.total > 0 ? Math.round((s.submitted / s.total) * 100) : 0;
-                    lines.push('  Wilayah ' + w + ': ' + s.submitted + '/' + s.total + ' (' + p + '%)');
-                });
-            } catch (e) {
-                lines.push('  [ERROR: ' + e.message + ']');
-            }
-            lines.push('');
-            lines.push('── CACHE INFO ──────────────────────────────');
-            let cacheEntries = 0;
-            for (let i = 0; i < sessionStorage.length; i++) {
-                const k = sessionStorage.key(i);
-                if (k && k.startsWith('tnocache_')) {
-                    cacheEntries++;
-                    try {
-                        const item = JSON.parse(sessionStorage.getItem(k));
-                        const age = Date.now() - item.ts;
-                        lines.push('  ' + k + ' — ' + (item.data ? item.data.length : 0) + ' rows, ' + Math.round(age / 1000) + 's old');
-                    } catch(_) {
-                        lines.push('  ' + k + ' — (corrupt)');
-                    }
-                }
-            }
-            if (cacheEntries === 0) lines.push('  (no cached entries)');
-            lines.push('');
-            lines.push('── ERROR / DEBUG LOG ───────────────────────');
-            if (debugLog.length === 0) {
-                lines.push('  (no errors logged)');
-            } else {
-                debugLog.forEach(e => {
-                    lines.push('  [' + e.ts + '] ' + e.msg + (e.data ? ' | ' + e.data : ''));
-                });
-            }
-            lines.push('');
-            lines.push('── END OF REPORT ──────────────────────────');
-
-            el.innerText = lines.join('\n');
-        }
-
-        function copyDebugReport() {
-            const text = document.getElementById('debug-content').innerText;
-            navigator.clipboard.writeText(text).then(function() {
-                showToast('Debug report copied to clipboard!');
-            }, function() {
-                showToast('Failed to copy — manual select & copy instead.');
-            });
-        }
-
-        // ── Year / month helpers ──────────────────────────────────────────────────
-        function changeYear(year) {
-            if (currentYear === year) return;
-            currentYear = year;
-            updateYearSelectorsUI();
-            renderMonthSelectors();
-            loadSheetFeed();
-        }
-
-        function setupYearSelectionBinding() {
-            validYearsArray = [];
-            document.querySelectorAll('#year-selector button').forEach(b => {
-                const v = b.innerText.trim(); if (v) validYearsArray.push(v);
-                b.addEventListener('click', () => { selDaerah = selType = selPic = selAudit = 'ALL'; });
-            });
-        }
-
-        function updateYearSelectorsUI() {
-            document.querySelectorAll('#year-selector button').forEach(b => {
-                b.className = 'py-1.5 text-xs font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800 w-full';
-            });
-            const active = document.getElementById('btn-' + currentYear);
-            if (active) active.className = 'py-1.5 text-xs font-bold rounded-lg transition-all duration-200 bg-white text-slate-800 shadow-sm w-full';
-        }
-
-        function changeMonth(m) {
-            if (currentMonth === m) return;
-            currentMonth = m;
-            renderMonthSelectors();
-            if (rawSheetData.length > 0) { closeDeepDiveModal(); calculateAndRenderUI(); handleSearch(); }
-        }
-
-        function showLoader(show) {
-            if (show) {
-                closeDeepDiveModal();
-                document.getElementById('loader').classList.remove('hidden');
-                document.getElementById('wilayah-grid').classList.add('hidden');
-                document.getElementById('comparison-graph-section').classList.add('hidden');
-            } else {
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('wilayah-grid').classList.remove('hidden');
-                document.getElementById('comparison-graph-section').classList.remove('hidden');
-            }
-        }
-
-        // ── AI Chat (N3) ──────────────────────────────────────────────────────────
-        const chatState = {
-            open: false,
-            messages: [],
-            lastIntent: null,
-            lastContext: {}
-        };
-
-        const MONTH_LOOKUP = {
-            'january': 'JAN', 'jan': 'JAN',
-            'february': 'FEB', 'feb': 'FEB',
-            'march': 'MAR', 'mar': 'MAR',
-            'april': 'APR', 'apr': 'APR',
-            'may': 'MAY',
-            'june': 'JUN', 'jun': 'JUN',
-            'july': 'JUL', 'jul': 'JUL',
-            'august': 'AUG', 'aug': 'AUG',
-            'september': 'SEP', 'sep': 'SEP',
-            'october': 'OCT', 'oct': 'OCT',
-            'november': 'NOV', 'nov': 'NOV',
-            'december': 'DEC', 'dec': 'DEC'
-        };
-
-        function toggleChat() {
-            chatState.open = !chatState.open;
-            const panel = document.getElementById('ai-chat-panel');
-            panel.classList.toggle('hidden', !chatState.open);
-            if (chatState.open) {
-                document.getElementById('chat-input').focus();
-                if (chatState.messages.length === 0) {
-                    const welcome = 'Hi! I can answer questions about the TNO report data.\n\n' +
-                        'Try asking:\n' +
-                        '• "How many churches in Wilayah 2?"\n' +
-                        '• "Which churches are pending for March?"\n' +
-                        '• "Show me SDA Likas"\n' +
-                        '• "What is the submission rate for 2025?"\n' +
-                        '• "Who is the PIC for Wilayah 4?"\n' +
-                        '• "Type help for more commands."';
-                    addChatMessage('bot', welcome);
-                }
-            }
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const query = input.value.trim();
-            if (!query) return;
-            input.value = '';
-            addChatMessage('user', query);
-            processChatQuery(query);
-        }
-
-        function addChatMessage(sender, text) {
-            const container = document.getElementById('chat-messages');
-            const div = document.createElement('div');
-            div.className = sender === 'user' ? 'flex justify-end' : 'flex justify-start';
-            const bg = sender === 'user' ? 'bg-blue-600 text-white rounded-br-md' : 'bg-white text-slate-800 rounded-bl-md border border-slate-200';
-            div.innerHTML = '<div class="max-w-[88%] p-2.5 rounded-2xl text-xs leading-relaxed ' + bg + ' whitespace-pre-wrap">' + escapeHtml(text) + '</div>';
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-            chatState.messages.push({ sender: sender, text: text });
-            if (chatState.messages.length > 20) chatState.messages.shift();
-        }
-
-        function escapeHtml(text) {
-            const d = document.createElement('div');
-            d.textContent = text;
-            return d.innerHTML;
-        }
-
-        function extractEntities(q) {
-            let mentionedMonth = null;
-            for (const name in MONTH_LOOKUP) {
-                if (q.includes(name)) { mentionedMonth = MONTH_LOOKUP[name]; break; }
-            }
-
-            let mentionedYear = null;
-            const ym = q.match(/20\d{2}/);
-            if (ym) mentionedYear = ym[0];
-
-            let mentionedWilayah = null;
-            const wm = q.match(/wilayah\s*(\d+)/i);
-            if (wm) mentionedWilayah = wm[1];
-
-            let mentionedDaerah = null;
-            const daerahs = [...new Set(rawSheetData.map(r => r.daerah).filter(Boolean))];
-            for (const d of daerahs) {
-                if (d && q.includes(d.toLowerCase())) { mentionedDaerah = d; break; }
-            }
-
-            let mentionedChurch = null;
-            const churches = [...new Set(rawSheetData.map(r => r.gereja).filter(Boolean))];
-            for (const ch of churches) {
-                if (ch && q.includes(ch.toLowerCase())) { mentionedChurch = ch; break; }
-            }
-
-            return { mentionedMonth, mentionedYear, mentionedWilayah, mentionedDaerah, mentionedChurch };
-        }
-
-        function processChatQuery(query) {
-            const q = query.toLowerCase().trim();
-
-            if (!rawSheetData || rawSheetData.length === 0) {
-                addChatMessage('bot', 'No data is currently loaded. Please wait for the page to load or click the Refresh button.');
-                return;
-            }
-
-            const entities = extractEntities(q);
-            const { mentionedMonth, mentionedYear, mentionedWilayah, mentionedDaerah, mentionedChurch } = entities;
-
-            const isFollowUp = q.startsWith('what about') || q.startsWith('how about') || q.startsWith('and') || q.startsWith('also');
-
-            // Help
-            if (q.includes('help') || q.includes('what can you do') || q.includes('commands') || q === '?') {
-                addChatMessage('bot',
-                    'I can answer questions about the TNO data:\n\n' +
-                    '📊 General:\n' +
-                    '  "How many churches total?"\n' +
-                    '  "What is the overall submission rate?"\n\n' +
-                    '🔍 By Wilayah / Daerah:\n' +
-                    '  "Show Wilayah 3"\n' +
-                    '  "How many in Kota Kinabalu?"\n\n' +
-                    '📅 By Month / Year:\n' +
-                    '  "Which are pending for March?"\n' +
-                    '  "Change to 2024"\n\n' +
-                    '🏛️ Specific church:\n' +
-                    '  "Show me SDA Likas"\n' +
-                    '  "Who is PIC for SDA Likas?"\n\n' +
-                    '📋 Audit & PIC:\n' +
-                    '  "Who is the PIC for Wilayah 2?"\n' +
-                    '  "Show audited churches"'
-                );
-                chatState.lastIntent = 'help';
-                return;
-            }
-
-            // === Detect intent ===
-            let intent = null;
-
-            if (q.includes('pic') || q.includes('person in charge') || q.includes('who is') || q.includes('responsible') || q.includes('contact') || q.includes('pr pic')) {
-                intent = 'pic';
-            } else if (q.includes('audit') || q.includes('audited') || q.includes('done audit') || q.includes('verify')) {
-                intent = 'audit';
-            } else if (q.includes('how many') || q.includes('count') || q.includes('total number') || q.includes('number of') || q.includes('how much')) {
-                intent = 'count';
-            } else if (q.includes('pending') || q.includes('not submit') || q.includes('not done') || q.includes('missing') || q.includes('outstanding') || q.includes('incomplete') || q.includes("haven't") || q.includes('not yet') || q.includes('still')) {
-                intent = 'pending';
-            } else if (q.includes('submitted') || q.includes('done') || q.includes('completed') || q.includes('finished') || q.includes('receiv') || q.includes('sent')) {
-                intent = 'submitted';
-            } else if (q.includes('percentage') || q.includes('percent') || q.includes('%') || q.includes('rate') || q.includes('completion') || q.includes('progress') || q.includes('overall') || q.includes('done %')) {
-                intent = 'percentage';
-            } else if (q.includes('show') || q.includes('find') || q.includes('search') || q.includes('detail') || q.includes('list') || q.includes('tell me about') || q.includes('what about') || q.includes('display') || q.includes('view')) {
-                intent = 'show';
-            } else if (mentionedYear && q.includes('year')) {
-                intent = 'change_year';
-            } else if (mentionedMonth && !intent) {
-                intent = 'change_month';
-            } else if (isFollowUp && chatState.lastIntent) {
-                intent = chatState.lastIntent;
-            } else {
-                intent = null;
-            }
-
-            chatState.lastIntent = intent;
-
-            // === Execute ===
-            if (!intent) {
-                addChatMessage('bot', "I'm not sure I understood. Try rephrasing, or type 'help' to see what I can do.");
-                return;
-            }
-
-            switch (intent) {
-                case 'pic':       answerPIC(entities, q); break;
-                case 'audit':     answerStatus('audit', entities, q); break;
-                case 'count':     answerCount(entities, q); break;
-                case 'pending':   answerStatus('pending', entities, q); break;
-                case 'submitted': answerStatus('submitted', entities, q); break;
-                case 'percentage': answerPercentage(entities, q); break;
-                case 'show':      answerShow(entities, q); break;
-                case 'change_year':
-                    if (mentionedYear && mentionedYear !== currentYear) {
-                        changeYear(mentionedYear);
-                        addChatMessage('bot', '✅ Switched to year ' + mentionedYear + '.');
-                    } else if (mentionedYear) {
-                        addChatMessage('bot', 'Already viewing year ' + currentYear + '.');
-                    } else {
-                        addChatMessage('bot', 'Currently viewing year ' + currentYear + '.');
-                    }
-                    break;
-                case 'change_month':
-                    if (mentionedMonth) {
-                        if (viewOptions.includes(mentionedMonth)) {
-                            changeMonth(mentionedMonth);
-                            addChatMessage('bot', '✅ Switched to ' + mentionedMonth + ' ' + currentYear + '.');
-                        } else {
-                            addChatMessage('bot', "Month '" + mentionedMonth + "' not valid. Options: " + months.join(', ') + ' or FULL YEAR.');
-                        }
-                    } else {
-                        addChatMessage('bot', 'Currently viewing ' + currentMonth + ' ' + currentYear + '.');
-                    }
-                    break;
-                default:
-                    addChatMessage('bot', "I'm not sure I understood. Try typing 'help'.");
-            }
-        }
-
-        function getFilteredData(entities) {
-            let data = rawSheetData;
-            if (entities.mentionedWilayah) data = data.filter(r => r.wilayah === entities.mentionedWilayah);
-            if (entities.mentionedDaerah) data = data.filter(r => r.daerah === entities.mentionedDaerah);
-            return data;
-        }
-
-        function countSubmitted(data, month) {
-            if (month === 'FULL YEAR') {
-                let s = 0;
-                data.forEach(r => months.forEach(m => { if (r.months[m] === 'Submitted') s++; }));
-                return s;
-            }
-            return data.filter(r => (r.months[month] || 'Pending') === 'Submitted').length;
-        }
-
-        function countTotal(data, month) {
-            return month === 'FULL YEAR' ? data.length * 12 : data.length;
-        }
-
-        function answerCount(entities, q) {
-            const month = entities.mentionedMonth || currentMonth;
-            const data = getFilteredData(entities);
-            if (data.length === 0) { addChatMessage('bot', 'No churches match that criteria.'); return; }
-            const submitted = countSubmitted(data, month);
-            const total = countTotal(data, month);
-            const pct = Math.round((submitted / total) * 100);
-
-            let loc = '';
-            if (entities.mentionedWilayah) loc += ' in Wilayah ' + entities.mentionedWilayah;
-            if (entities.mentionedDaerah) loc += ' in ' + entities.mentionedDaerah;
-
-            addChatMessage('bot',
-                '📊 Total churches' + loc + ': ' + data.length + '\n' +
-                '📅 Period: ' + month + ' ' + (entities.mentionedYear || currentYear) + '\n' +
-                '✅ Submitted: ' + submitted + '/' + total + '\n' +
-                '📈 Completion: ' + pct + '%');
-        }
-
-        function answerStatus(mode, entities, q) {
-            const month = entities.mentionedMonth || currentMonth;
-            let data = getFilteredData(entities);
-            if (entities.mentionedChurch) data = data.filter(r => r.gereja === entities.mentionedChurch);
-            if (data.length === 0) { addChatMessage('bot', 'No churches match that criteria.'); return; }
-
-            if (entities.mentionedChurch) {
-                const c = data[0];
-                let str = '🏛️ **' + c.gereja + '**\n';
-                str += '   Wilayah: ' + c.wilayah + ' | Daerah: ' + c.daerah + '\n';
-                str += '   Type: ' + c.type + ' | PIC: ' + c.prPic + ' | Audit: ' + c.audit + '\n\n';
-                str += '   Monthly status:\n';
-                months.forEach(m => {
-                    const ok = c.months[m] === 'Submitted';
-                    str += '   ' + m + ': ' + (ok ? '✅ Submitted' : '🔴 Pending') + '\n';
-                });
-                addChatMessage('bot', str);
-                return;
-            }
-
-            const submitted = countSubmitted(data, month);
-            const total = countTotal(data, month);
-            const pending = total - submitted;
-
-            const list = mode === 'pending'
-                ? data.filter(r => (r.months[month] || 'Pending') !== 'Submitted')
-                : data.filter(r => (r.months[month] || 'Pending') === 'Submitted');
-
-            let loc = '';
-            if (entities.mentionedWilayah) loc += ' Wilayah ' + entities.mentionedWilayah;
-            if (entities.mentionedDaerah) loc += ' ' + entities.mentionedDaerah;
-
-            let msg = (mode === 'pending' ? '🔴' : '✅') + ' ' + (mode === 'pending' ? 'Pending' : 'Submitted') + ' churches' + loc + ' for ' + month + ' ' + (entities.mentionedYear || currentYear) + ':\n\n';
-            if (list.length === 0) {
-                msg += (mode === 'pending' ? 'All churches have submitted! 🎉' : 'No churches have submitted yet.');
-            } else if (list.length <= 20) {
-                msg += list.map(r => '• ' + r.gereja + ' (W' + r.wilayah + ', ' + r.daerah + ')').join('\n');
-                msg += '\n\n' + list.length + ' of ' + total + ' churches';
-            } else {
-                msg += list.slice(0, 20).map(r => '• ' + r.gereja + ' (W' + r.wilayah + ', ' + r.daerah + ')').join('\n');
-                msg += '\n\n... and ' + (list.length - 20) + ' more. Total: ' + list.length + ' of ' + total;
-            }
-            addChatMessage('bot', msg);
-        }
-
-        function answerPercentage(entities, q) {
-            const month = entities.mentionedMonth || currentMonth;
-            const data = getFilteredData(entities);
-            if (data.length === 0) { addChatMessage('bot', 'No data to calculate percentage.'); return; }
-            const submitted = countSubmitted(data, month);
-            const total = countTotal(data, month);
-            const pct = Math.round((submitted / total) * 100);
-            const pending = total - submitted;
-
-            let loc = '';
-            if (entities.mentionedWilayah) loc += ' Wilayah ' + entities.mentionedWilayah;
-            if (entities.mentionedDaerah) loc += ' ' + entities.mentionedDaerah;
-
-            addChatMessage('bot',
-                '📈 Submission rate' + loc + ' (' + month + ' ' + (entities.mentionedYear || currentYear) + '):\n\n' +
-                '✅ ' + pct + '% completed\n' +
-                '📊 ' + submitted + ' submitted / ' + total + ' total\n' +
-                '⏳ ' + pending + ' pending');
-        }
-
-        function answerShow(entities, q) {
-            if (entities.mentionedChurch) {
-                answerStatus('pending', entities, q);
-                return;
-            }
-            if (entities.mentionedWilayah || entities.mentionedDaerah) {
-                const data = getFilteredData(entities);
-                if (data.length === 0) { addChatMessage('bot', 'No data found.'); return; }
-                const month = entities.mentionedMonth || currentMonth;
-                const submitted = countSubmitted(data, month);
-                const total = countTotal(data, month);
-                const pct = Math.round((submitted / total) * 100);
-
-                let msg = '📋 Showing ' + data.length + ' churches';
-                if (entities.mentionedWilayah) msg += ' in Wilayah ' + entities.mentionedWilayah;
-                if (entities.mentionedDaerah) msg += ' in ' + entities.mentionedDaerah;
-                msg += ' (' + month + ' ' + (entities.mentionedYear || currentYear) + ')\n\n';
-                msg += '📍 Overview: ' + submitted + '/' + total + ' submitted (' + pct + '%)\n\n';
-
-                if (data.length <= 15) {
-                    data.forEach(c => {
-                        const ok = (c.months[month] || 'Pending') === 'Submitted';
-                        msg += '• ' + (ok ? '✅' : '🔴') + ' ' + c.gereja + ' (W' + c.wilayah + ') — ' + c.daerah + '\n';
-                    });
-                } else {
-                    data.slice(0, 15).forEach(c => {
-                        const ok = (c.months[month] || 'Pending') === 'Submitted';
-                        msg += '• ' + (ok ? '✅' : '🔴') + ' ' + c.gereja + ' (W' + c.wilayah + ') — ' + c.daerah + '\n';
-                    });
-                    msg += '\n... and ' + (data.length - 15) + ' more.';
-                }
-                addChatMessage('bot', msg);
-                return;
-            }
-            addChatMessage('bot', 'Try being more specific — e.g. "show Wilayah 3", "show SDA Likas", or "list churches in Kota Kinabalu".');
-        }
-
-        function answerPIC(entities, q) {
-            const data = getFilteredData(entities);
-            if (data.length === 0) { addChatMessage('bot', 'No churches match that criteria.'); return; }
-
-            const pics = [...new Set(data.map(r => r.prPic).filter(p => p && p !== '-'))];
-            if (pics.length === 0) {
-                addChatMessage('bot', 'No PR PIC information found for this selection.');
-                return;
-            }
-
-            let loc = '';
-            if (entities.mentionedWilayah) loc += ' Wilayah ' + entities.mentionedWilayah;
-            if (entities.mentionedDaerah) loc += ' ' + entities.mentionedDaerah;
-            if (entities.mentionedChurch) loc += ' for ' + entities.mentionedChurch;
-
-            let msg = '👤 PR PIC' + loc + ':\n\n';
-            if (pics.length <= 10) {
-                pics.sort().forEach(p => {
-                    const count = data.filter(r => r.prPic === p).length;
-                    msg += '• ' + p + ' (' + count + ' churches)\n';
-                });
-            } else {
-                msg += pics.length + ' different PICs found. Top 10:\n\n';
-                pics.sort().slice(0, 10).forEach(p => {
-                    const count = data.filter(r => r.prPic === p).length;
-                    msg += '• ' + p + ' (' + count + ' churches)\n';
-                });
-            }
-            addChatMessage('bot', msg);
-        }
-
-        window.onload = function() { initApp(); };
-    </script>
+    <div id="chatInputArea">
+      <input id="chatInput" type="text" placeholder="Ask about the TNO data…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}">
+      <button id="chatSendBtn" onclick="sendChat()">Ask</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="hidden"></div>
+
+<script>
+const SPREADSHEET_BASE_ID = '1x3GOISJ6VrvytCil-l_INYRK0HU_s_vf6U1Y2Lpzd8A';
+const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const viewOptions = [...months, 'FULL YEAR'];
+const PAL = ['#3b82f6','#10b981','#f0b429','#ef4444','#8b5cf6','#ec4899','#22d3ee','#f97316','#a3e635','#fb7185','#06b6d4','#84cc16'];
+
+let currentYear = '', currentMonth = '', rawSheetData = [];
+let selectedWilayah = null, currentLanguage = 'en';
+let validYearsArray = [], summaryMetrics = null;
+let selDaerah = 'ALL', selType = 'ALL', selPic = 'ALL', selAudit = 'ALL';
+const actualCalendarYear = new Date().getFullYear().toString();
+const actualPreviousYear = (new Date().getFullYear() - 1).toString();
+const actualCurrentMonth = months[new Date().getMonth()];
+const debugLog = [];
+
+// ── Lang ──
+const dict = {
+  en: {
+    title:'TNO Report Submission Status', subtitle:'SABAH MISSION — FINANCE DEPARTMENT',
+    ls:'Live Sync Active (5 mins cache)', selY:'Select Year', selV:'Select View',
+    fd:'Daerah Location', ft:'Classification Type', fp:'PR PIC Person', fa:'Audit Status',
+    search:'Search Church / Daerah…', fetching:'Loading data from Google Sheets…',
+    sa:'Status as of:', pen:'Pending', sub:'Submitted', rec:'Received', allin:'✨ All In!',
+    full:'FULL YEAR', fullL:'📊 Full Year Overview', annV:'Annual View',
+    sumT:'Executive Summary',
+    sum1T:'Pending ('+actualPreviousYear+')', sum1S:'Of total year expectations',
+    sum2T:'Pending ('+actualCurrentMonth+' '+actualCalendarYear+')', sum2S:'Churches yet to submit',
+    sum3T:'Submitted ('+actualCurrentMonth+' '+actualCalendarYear+')', sum3S:'Churches submitted this month'
+  },
+  bm: {
+    title:'Status Penyerahan Laporan TNO', subtitle:'MISSION SABAH — JABATAN KEWANGAN',
+    ls:'Penyegerakan Aktif (5 min cache)', selY:'Pilih Tahun', selV:'Pilih Paparan',
+    fd:'Kawasan Daerah', ft:'Jenis Klasifikasi', fp:'Pegawai PR PIC', fa:'Status Audit',
+    search:'Cari Gereja / Daerah…', fetching:'Mengambil data dari Google Sheets…',
+    sa:'Status setakat:', pen:'Tertunggak', sub:'Dihantar', rec:'Diterima', allin:'✨ Selesai!',
+    full:'SEPANJANG TAHUN', fullL:'📊 Gambaran Keseluruhan Tahunan', annV:'Paparan Tahunan',
+    sumT:'Ringkasan Eksekutif',
+    sum1T:'Laporan Tertunggak ('+actualPreviousYear+')', sum1S:'Daripada jangkaan tahunan',
+    sum2T:'Tertunggak ('+actualCurrentMonth+' '+actualCalendarYear+')', sum2S:'Gereja belum menghantar',
+    sum3T:'Dihantar ('+actualCurrentMonth+' '+actualCalendarYear+')', sum3S:'Gereja telah menghantar bulan ini'
+  }
+};
+function gt(k){return dict[currentLanguage][k]||k}
+
+// ── Cache ──
+const CACHE_TTL = 5*60*1000;
+function cGet(s){try{const r=sessionStorage.getItem('tnoc_'+s);if(!r)return null;const i=JSON.parse(r);if(Date.now()-i.ts>CACHE_TTL){sessionStorage.removeItem('tnoc_'+s);return null}return i.data}catch(e){return null}}
+function cSet(s,d){try{sessionStorage.setItem('tnoc_'+s,JSON.stringify({ts:Date.now(),data:d}))}catch(e){}}
+function cClear(){for(let i=0;i<sessionStorage.length;i++){const k=sessionStorage.key(i);if(k&&k.startsWith('tnoc_'))sessionStorage.removeItem(k)}}
+function sheetUrl(sn){return `https://docs.google.com/spreadsheets/d/${SPREADSHEET_BASE_ID}/gviz/tq?tqx=out:csv&sheet=${sn}&t=${Date.now()}`}
+async function fetchCached(sn){const c=cGet(sn);if(c)return c;const r=await fetch(sheetUrl(sn));if(!r.ok)throw new Error('HTTP '+r.status);const d=parseCsv(await r.text());if(d.length>0)cSet(sn,d);return d}
+
+function parseCsv(text){
+  const lines=text.split('\n');if(lines.length<2)return[];const data=[];
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].trim())continue;
+    const cols=lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c=>c.replace(/^"|"$/g,'').trim());
+    if(cols.length<4||!cols[0])continue;
+    const row={wilayah:cols[0],daerah:cols[1]||'-',gereja:cols[2]||'Unnamed',type:cols[3]||'General',prPic:cols[4]||'-',audit:cols[5]||'-',months:{}};
+    months.forEach((m,idx)=>{row.months[m]=isSub(cols[6+idx])?'Submitted':'Pending'});
+    data.push(row);
+  }
+  return data;
+}
+
+function isSub(s){if(!s)return false;const t=s.toLowerCase().trim();return t.includes('submit')||t.includes('receiv')}
+function isAud(s){if(!s||s==='-')return false;const t=s.toLowerCase().trim();return t.includes('done')||t.includes('audit')||t.includes('complet')||t.includes('yes')||t.includes('verif')||t.includes('finish')}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.add('hidden'),2500)}
+
+// ── Lang UI ──
+function changeLang(l){
+  currentLanguage=l;
+  document.getElementById('langEn').className='lang-btn'+(l==='en'?' on':'');
+  document.getElementById('langBm').className='lang-btn'+(l==='bm'?' on':'');
+  document.querySelectorAll('[data-l]').forEach(el=>{const k=el.getAttribute('data-l');if(dict[currentLanguage][k])el.innerText=dict[currentLanguage][k]});
+  document.querySelectorAll('[data-pl]').forEach(el=>{const k=el.getAttribute('data-pl');if(dict[currentLanguage][k])el.placeholder=dict[currentLanguage][k]});
+  document.getElementById('ftT').textContent=gt('sa')+' '+new Date().toLocaleString();
+  if(rawSheetData.length>0)renderAll();
+}
+
+// ── Init ──
+async function init(){
+  setupYrs();
+  currentYear=actualCalendarYear;currentMonth=actualCurrentMonth;
+  if(!validYearsArray.includes(currentYear))currentYear=validYearsArray.length>0?validYearsArray[validYearsArray.length-1]:'2026';
+  renderYrSel();renderAll();
+}
+
+function setupYrs(){
+  validYearsArray=[];
+  document.querySelectorAll('#yrSel button').forEach(b=>{const v=b.innerText.trim();if(v)validYearsArray.push(v)});
+}
+
+function renderYrSel(){
+  document.getElementById('yrSel').innerHTML=validYearsArray.map(y=>`<button class="yr-btn${y===currentYear?' on':''}" onclick="changeYear('${y}')">${y}</button>`).join('');
+}
+
+function changeYear(y){
+  if(currentYear===y)return;
+  currentYear=y;renderYrSel();loadData();
+}
+
+// ── Load ──
+async function loadData(){
+  document.getElementById('main').innerHTML='<div class="center-state"><div class="spin"></div><div>'+gt('fetching')+'</div></div>';
+  try{
+    rawSheetData=await fetchCached(currentYear);
+    buildFilters();
+    document.getElementById('loader').classList.add('hide');
+    if(!document.getElementById('ft').style.display||document.getElementById('ft').style.display==='none')document.getElementById('ft').style.display='';
+    document.getElementById('ftT').textContent=gt('sa')+' '+new Date().toLocaleString();
+    renderAll();
+    loadSummary();
+  }catch(e){
+    document.getElementById('main').innerHTML='<div class="center-state"><p style="color:var(--red);font-weight:700">Failed to load data.</p><p style="font-size:12px;color:var(--muted)">'+e.message+'</p></div>';
+    document.getElementById('loader').classList.add('hide');
+  }
+}
+
+async function loadSummary(){
+  try{
+    let prevData=null,currData=null;
+    try{prevData=await fetchCached(actualPreviousYear)}catch(e){}
+    if(currentYear===actualCalendarYear&&rawSheetData.length>0)currData=rawSheetData;
+    else try{currData=await fetchCached(actualCalendarYear)}catch(e){}
+    let prevPct=null,currPct=null,sub=0,tot=0,subPct=null;
+    if(prevData&&prevData.length>0){let t=0,p=0;prevData.forEach(c=>{months.forEach(m=>{t++;if(c.months[m]!=='Submitted')p++})});prevPct=t>0?Math.round(p/t*100):0}
+    if(currData&&currData.length>0){tot=currData.length;let cp=0;currData.forEach(c=>{if(c.months[actualCurrentMonth]!=='Submitted')cp++});currPct=tot>0?Math.round(cp/tot*100):0;sub=tot-cp;subPct=tot>0?Math.round(sub/tot*100):0}
+    summaryMetrics={prevPct,currPct,sub,tot,subPct};
+  }catch(e){}
+}
+
+function buildFilters(){
+  const d=new Set,t=new Set,p=new Set,a=new Set;
+  rawSheetData.forEach(r=>{if(r.daerah&&r.daerah!=='-')d.add(r.daerah);if(r.type&&r.type!=='-')t.add(r.type);if(r.prPic&&r.prPic!=='-')p.add(r.prPic);if(r.audit&&r.audit!=='-')a.add(r.audit)});
+  populate('fd',d,selDaerah);populate('ft',t,selType);populate('fp',p,selPic);populate('fa',a,selAudit);
+}
+
+function populate(id,s,av){
+  const el=document.getElementById(id);el.innerHTML='<option value="ALL">All</option>';
+  Array.from(s).sort().forEach(v=>{const o=document.createElement('option');o.value=v;o.innerText=v;if(v===av)o.selected=true;el.appendChild(o)});
+}
+
+function renderAll(){
+  const m=document.getElementById('main');
+  if(!rawSheetData||!rawSheetData.length){m.innerHTML='<div class="center-state"><p style="color:var(--muted);font-weight:600">No data loaded.</p></div>';return}
+  const data=applyFilters(rawSheetData);
+  const viewText=currentMonth==='FULL YEAR'?gt('annV'):currentMonth;
+  const wMap=getWilayahMap(data);
+  const totalChurches=Object.values(wMap).reduce((s,w)=>s+w.total,0);
+  const totalSubmitted=Object.values(wMap).reduce((s,w)=>s+w.submitted,0);
+  const globalPct=totalChurches>0?Math.round(totalSubmitted/totalChurches*100):0;
+  const sm=summaryMetrics;
+
+  m.innerHTML=`<div class="fade-in">
+    <div class="page-header">
+      <div class="mode-label lbl-c">📋 TNO Report · ${viewText} ${currentYear}</div>
+      <h1 class="page-title">Submission <em>Status</em> <span class="ac-blue">Dashboard</span></h1>
+      <p class="page-sub">${gt('subtitle')} · ${rawSheetData.length} churches · ${Object.keys(wMap).length} wilayah${daerahCount(data)>0?' · '+daerahCount(data)+' daerah':''}</p>
+    </div>
+    ${kpiRow(sm,totalChurches,totalSubmitted,globalPct)}
+    ${filterPanel()}
+    ${monthPanel()}
+    ${wilayahGrid(wMap,globalPct)}
+    ${daerahBarList(wMap)}
+  </div>`;
+  document.getElementById('ft').style.display='';
+  setTimeout(animBars,100);
+}
+
+function applyFilters(d){
+  return d.filter(r=>{
+    if(selDaerah!=='ALL'&&r.daerah!==selDaerah)return false;
+    if(selType!=='ALL'&&r.type!==selType)return false;
+    if(selPic!=='ALL'&&r.prPic!==selPic)return false;
+    if(selAudit!=='ALL'&&r.audit!==selAudit)return false;
+    return true;
+  });
+}
+
+function getWilayahMap(data){
+  const m={};
+  data.forEach(item=>{
+    const w=item.wilayah;if(!w)return;
+    if(!m[w])m[w]={total:0,submitted:0,data:[]};
+    if(currentMonth==='FULL YEAR'){
+      m[w].total+=12;
+      months.forEach(mn=>{if(item.months[mn]==='Submitted')m[w].submitted++});
+    }else{
+      m[w].total++;
+      if((item.months[currentMonth]||'Pending')==='Submitted')m[w].submitted++;
+    }
+    m[w].data.push(item);
+  });
+  return m;
+}
+
+function daerahCount(d){return new Set(d.map(r=>r.daerah).filter(Boolean)).size}
+
+// ── KPI ──
+function kpiRow(sm,totalChurches,totalSubmitted,globalPct){
+  const c1=sm&&sm.prevPct!==null?sm.prevPct:null;
+  const c2=sm&&sm.currPct!==null?sm.currPct:null;
+  const c3=sm&&sm.subPct!==null?sm.subPct:null;
+  return `<div class="kpi-row">
+    ${kpiCard('cb','📋','Total Churches',totalChurches,'Across all wilayah',totalChories>0?100:0)}
+    ${kpiCard('cg','✅','Submitted',totalSubmitted,globalPct+'% completion',globalPct)}
+    ${kpiCard('ca','⏳','Pending',totalChurches-totalSubmitted,(totalChurches>0?Math.round((totalChurches-totalSubmitted)/totalChurches*100):0)+'% of total',totalChurches>0?Math.round((totalChurches-totalSubmitted)/totalChurches*100):0)}
+    ${kpiCard('cp','📍','Wilayah',Object.keys(getWilayahMap(applyFilters(rawSheetData))).length,'Active regions',100)}
+  </div><div class="kpi-row">
+    ${kpi2('cb','📅',c1!==null?c1+'%':'—',gt('sum1T'),gt('sum1S'),c1||0)}
+    ${kpi2('ca','⏳',c2!==null?c2+'%':'—',gt('sum2T'),gt('sum2S'),c2||0)}
+    ${kpi2('cg','✅',c3!==null?c3+'%':'—',gt('sum3T'),sm?sm.sub+' / '+sm.tot+' · '+gt('sum3S'):'',c3||0)}
+    ${kpi2('ct','🔄',currentMonth,gt('selV'),currentYear,100)}
+  </div>`;
+}
+function kpiCard(cls,ic,lb,val,meta,bar){
+  return `<div class="kpi ${cls}"><div class="kpi-ic">${ic}</div><div class="kpi-lbl">${lb}</div><div class="kpi-val">${val}</div><div class="kpi-meta">${meta}</div><div class="kpi-bar"><div class="kpi-bar-fill" style="width:${bar}%"></div></div></div>`;
+}
+function kpi2(cls,ic,val,lb,meta,bar){
+  return `<div class="kpi ${cls}" style="cursor:pointer" onclick="showCardDetails('${lb}')"><div class="kpi-ic">${ic}</div><div class="kpi-lbl">${lb}</div><div class="kpi-val" style="font-size:28px">${val}</div><div class="kpi-meta">${meta}</div><div class="kpi-bar"><div class="kpi-bar-fill" style="width:${bar}%"></div></div></div>`;
+}
+
+// ── Filter panel ──
+function filterPanel(){
+  return `<div class="filter-panel">
+    <div class="filter-group">
+      <span class="filter-label">${gt('fd')}</span>
+      <select id="fd" onchange="hf(this,'selDaerah')" class="flt"></select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">${gt('ft')}</span>
+      <select id="ft" onchange="hf(this,'selType')" class="flt"></select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">${gt('fp')}</span>
+      <select id="fp" onchange="hf(this,'selPic')" class="flt"></select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">${gt('fa')}</span>
+      <select id="fa" onchange="hf(this,'selAudit')" class="flt"></select>
+    </div>
+    <button class="icon-btn" onclick="resetFilters()" style="font-size:11px;padding:8px 12px">✕ Reset</button>
+  </div>`;
+}
+function hf(el,prop){window[prop]=el.value;renderAll()}
+function resetFilters(){selDaerah=selType=selPic=selAudit='ALL';document.querySelectorAll('.filter-panel select').forEach(e=>e.value='ALL');renderAll()}
+
+// ── Month panel ──
+function monthPanel(){
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:10px">
+    <div class="month-grid" style="flex:1;min-width:200px">
+      ${viewOptions.map(m=>`<button class="month-btn${m===currentMonth?' on':''}${m==='FULL YEAR'?' full':''}" onclick="changeMonth('${m}')">${m==='FULL YEAR'?gt('full'):m}</button>`).join('')}
+    </div>
+    <div class="srch" style="max-width:260px">
+      <span class="sic">🔍</span>
+      <input type="text" placeholder="${gt('search')}" data-pl="search" oninput="searchData(this.value)" style="padding:8px 12px 8px 34px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r2);color:var(--white);font-family:inherit;font-size:12px;font-weight:600;outline:none;transition:border-color .2s;width:100%">
+    </div>
+  </div>`;
+}
+
+let searchQ='';
+function searchData(q){searchQ=q.toLowerCase().trim();renderAll()}
+
+function changeMonth(m){
+  if(currentMonth===m)return;
+  currentMonth=m;renderAll();
+}
+
+// ── Wilayah grid ──
+function wilayahGrid(wMap,globalPct){
+  const keys=Object.keys(wMap).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  return `<div class="sec">Wilayah Progress <span style="font-size:10px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted)">— ${globalPct}% overall</span></div>
+  <div class="wgrid">${keys.length?keys.map(w=>wcard(w,wMap[w])).join(''):'<div style="color:var(--muted);padding:24px;text-align:center;font-weight:600;grid-column:1/-1">No matching data</div>'}</div>`;
+}
+
+function wcard(name,st){
+  const pct=st.total>0?Math.round(st.submitted/st.total*100):0;
+  const pend=st.total-st.submitted;
+  return `<div class="wcard${selectedWilayah===name?' act':''}" onclick="openWilayah('${name}')">
+    <div class="wname">📍 ${name}</div>
+    <div class="wstats">
+      <div class="ws"><span class="wsv" style="color:#4ade80">${st.submitted}</span><span class="wsl">Submitted</span></div>
+      <div class="ws"><span class="wsv" style="color:#fca5a5">${pend}</span><span class="wsl">Pending</span></div>
+      <div class="ws"><span class="wsv" style="color:var(--sky)">${st.total}</span><span class="wsl">Total</span></div>
+    </div>
+    <div class="wprog"><div class="wfill" style="width:${pct}%"></div></div>
+    <div class="wpct">${pct}% done</div>
+  </div>`;
+}
+
+function openWilayah(name){
+  selectedWilayah=name;renderAll();
+  const wMap=getWilayahMap(applyFilters(rawSheetData));
+  showWilayahModal(name,wMap[name]);
+}
+
+// ── Daerah bar list ──
+function daerahBarList(wMap){
+  const daeMap={};
+  Object.values(wMap).forEach(st=>{
+    st.data.forEach(c=>{
+      if(!daeMap[c.daerah])daeMap[c.daerah]={total:0,submitted:0};
+      if(currentMonth==='FULL YEAR'){
+        daeMap[c.daerah].total+=12;
+        months.forEach(m=>{if(c.months[m]==='Submitted')daeMap[c.daerah].submitted++});
+      }else{
+        daeMap[c.daerah].total++;
+        if((c.months[currentMonth]||'Pending')==='Submitted')daeMap[c.daerah].submitted++;
+      }
+    });
+  });
+  const dae=Object.entries(daeMap).map(([n,d])=>({n,...d,pct:d.total>0?Math.round(d.submitted/d.total*100):0})).sort((a,b)=>b.total-a.total);
+  return `<div class="g2" style="margin-bottom:0">
+    <div class="card">
+      <div class="card-t">Submission by Daerah</div>
+      <div class="card-s">Daerah progress · ${dae.length} daerah</div>
+      <div class="bar-list">${dae.length?dae.map(d=>`<div class="brow"><div class="bhdr"><span class="bname">${d.n}</span><span class="bstat">${d.submitted}/${d.total} · <span style="color:var(--white);font-weight:700">${d.pct}%</span></span></div><div class="btrack"><div class="bfill" style="width:${d.pct}%;background:${PAL[Math.abs(d.n.length)%PAL.length]}"></div></div></div>`).join(''):'<div style="color:var(--muted);font-size:12px;font-weight:600;text-align:center;padding:20px">No data</div>'}</div>
+    </div>
+    <div class="card">
+      <div class="card-t">Church Records</div>
+      <div class="card-s">${rawSheetData.length} total · ${searchQ?applyFilters(rawSheetData).filter(c=>c.gereja.toLowerCase().includes(searchQ)||c.daerah.toLowerCase().includes(searchQ)||c.wilayah.toLowerCase().includes(searchQ)).length+' filtered':''}</div>
+      ${churchTable()}
+    </div>
+  </div>`;
+}
+
+function churchTable(){
+  let data=applyFilters(rawSheetData);
+  if(searchQ)data=data.filter(c=>c.gereja.toLowerCase().includes(searchQ)||c.daerah.toLowerCase().includes(searchQ)||c.wilayah.toLowerCase().includes(searchQ)||c.prPic.toLowerCase().includes(searchQ));
+  const view=currentMonth;
+  const h=view==='FULL YEAR'?['Church','Wilayah','Daerah','Type','PIC','Audit',...months]:['Church','Wilayah','Daerah','Type','PIC','Audit','Status'];
+  const rows=data.slice(0,50);
+  return `<div class="twrap"><table><thead><tr>${h.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>
+    ${rows.length?rows.map(r=>{
+      const st=view==='FULL YEAR'?months.map(m=>r.months[m]==='Submitted'?'✓':'✗'):[(r.months[view]||'Pending')==='Submitted'?'✅ '+gt('sub'):'🔴 '+gt('pen')];
+      return `<tr><td style="font-weight:700">${r.gereja}</td><td style="color:var(--sky)">${r.wilayah}</td><td>${r.daerah}</td><td style="color:var(--muted)">${r.type}</td><td style="color:var(--muted)">${r.prPic||'—'}</td><td>${r.audit&&r.audit!=='-'?`<span class="pill ${isAud(r.audit)?'pa':'pw'}">${r.audit}</span>`:'—'}</td>${st.map(s=>`<td style="text-align:center;color:${s.includes('✓')||s.includes('✅')?'var(--green)':'var(--red)'};font-weight:700">${s}</td>`).join('')}</tr>`
+    }).join(''):'<tr><td colspan="'+(h.length)+'" style="text-align:center;padding:24px;color:var(--muted)">No records</td></tr>'}
+  </tbody></table>
+  ${data.length>50?`<div style="padding:10px 14px;font-size:11px;color:var(--muted);font-weight:600;border-top:1px solid var(--border)">Showing 50 of ${data.length} records</div>`:''}
+  </div>`;
+}
+
+// ── Wilayah deep-dive modal ──
+function showWilayahModal(name,st){
+  document.getElementById('cdTitle').textContent='📍 Wilayah '+name;
+  document.getElementById('cdSub').textContent=(currentMonth==='FULL YEAR'?gt('annV'):currentMonth)+' '+currentYear;
+  const body=document.getElementById('cdBody');
+  const daeMap={};
+  st.data.forEach(c=>{if(!daeMap[c.daerah])daeMap[c.daerah]=[];daeMap[c.daerah].push(c)});
+  const pct=st.total>0?Math.round(st.submitted/st.total*100):0;
+  let rowsHtml='';
+  Object.keys(daeMap).sort().forEach(d=>{
+    const list=daeMap[d];
+    let dDone=0,dTot=0;
+    if(currentMonth==='FULL YEAR'){list.forEach(c=>{dTot+=12;months.forEach(m=>{if(c.months[m]==='Submitted')dDone++})})}else{dTot=list.length;dDone=list.filter(c=>c.months[currentMonth]==='Submitted').length}
+    const dPct=dTot>0?Math.round(dDone/dTot*100):0;
+    rowsHtml+=`<tr><td style="font-weight:700;color:var(--sky)">${d}</td><td>${dTot}</td><td style="color:#4ade80">${dDone}</td><td style="color:#fca5a5">${dTot-dDone}</td><td style="font-weight:700">${dPct}%</td></tr>`;
+  });
+  body.innerHTML=`<div class="cd-summary">
+    <div class="cd-sum-item"><div class="cd-sum-label">Total Churches</div><div class="cd-sum-val blue">${st.data.length}</div></div>
+    <div class="cd-sum-item"><div class="cd-sum-label">Submitted</div><div class="cd-sum-val green">${st.submitted}</div></div>
+    <div class="cd-sum-item"><div class="cd-sum-label">Pending</div><div class="cd-sum-val red">${st.total-st.submitted}</div></div>
+    <div class="cd-sum-item"><div class="cd-sum-label">Completion</div><div class="cd-sum-val gold">${pct}%</div></div>
+  </div>
+  <table class="cd-table"><thead><tr><th>Daerah</th><th>Total</th><th>Submitted</th><th>Pending</th><th>%</th></tr></thead><tbody>${rowsHtml||'<tr><td colspan="5" class="cd-empty">No data</td></tr>'}</tbody></table>`;
+  document.getElementById('cardDetailModal').classList.add('open');
+}
+function closeCardDetails(){document.getElementById('cardDetailModal').classList.remove('open')}
+
+// ── Debug ──
+function showDebug(){
+  const box=document.getElementById('debugContent');
+  const lines=[];
+  lines.push('═══ TNO REPORT — DIAGNOSTIC REPORT ═══');
+  lines.push('Generated: '+new Date().toISOString());
+  lines.push('');
+  lines.push('── APP STATE ──');
+  lines.push('  currentYear: '+currentYear);
+  lines.push('  currentMonth: '+currentMonth);
+  lines.push('  language: '+currentLanguage);
+  lines.push('  selDaerah: '+selDaerah);
+  lines.push('  selType: '+selType);
+  lines.push('  selPic: '+selPic);
+  lines.push('  selAudit: '+selAudit);
+  lines.push('  selectedWilayah: '+(selectedWilayah||'none'));
+  lines.push('');
+  lines.push('── DATASET ──');
+  lines.push('  sheet ID: '+SPREADSHEET_BASE_ID);
+  lines.push('  raw records: '+rawSheetData.length);
+  lines.push('  after filters: '+applyFilters(rawSheetData).length);
+  lines.push('  unique wilayah: '+new Set(rawSheetData.map(c=>c.wilayah)).size);
+  lines.push('');
+  lines.push('── RAW DATA ──');
+  try{lines.push(JSON.stringify(rawSheetData,null,2))}catch(e){lines.push('[ERROR: '+e.message+']')}
+  lines.push('');
+  lines.push('── FILTERED DATA ──');
+  try{lines.push(JSON.stringify(applyFilters(rawSheetData),null,2))}catch(e){lines.push('[ERROR]')}
+  lines.push('');
+  lines.push('── WILAYAH MAP ──');
+  try{
+    const m=getWilayahMap(applyFilters(rawSheetData));
+    Object.keys(m).sort().forEach(w=>{const s=m[w];const p=s.total>0?Math.round(s.submitted/s.total*100):0;lines.push('  '+w+': '+s.submitted+'/'+s.total+' ('+p+'%)')});
+  }catch(e){lines.push('[ERROR]')}
+  lines.push('');
+  lines.push('── CACHE ──');
+  let cnt=0;
+  for(let i=0;i<sessionStorage.length;i++){const k=sessionStorage.key(i);if(k&&k.startsWith('tnoc_')){cnt++;try{const it=JSON.parse(sessionStorage.getItem(k));lines.push('  '+k+' — '+(it.data?it.data.length:0)+' rows, '+Math.round((Date.now()-it.ts)/1000)+'s old')}catch(_){lines.push('  '+k+' — corrupt')}}}
+  if(!cnt)lines.push('  (none)');
+  lines.push('');
+  lines.push('── ERROR LOG ──');
+  if(!debugLog.length)lines.push('  (none)');
+  else debugLog.forEach(e=>lines.push('  ['+e.ts+'] '+e.msg+(e.data?' | '+e.data:'')));
+  lines.push('');
+  lines.push('═══ END ═══');
+  box.textContent=lines.join('\n');
+  document.getElementById('debugModal').style.display='flex';
+}
+function copyDebug(){
+  const t=document.getElementById('debugContent').textContent;
+  navigator.clipboard.writeText(t).then(()=>showToast('Diagnostic report copied!'),()=>showToast('Failed to copy'));
+}
+function doRefresh(){
+  cClear();rawSheetData=[];loadData();showToast('Data refreshed!');
+}
+
+// ── Card summary popup ──
+function showCardDetails(label){
+  const sm=summaryMetrics;
+  document.getElementById('cdTitle').textContent=label;
+  document.getElementById('cdSub').textContent='Executive Summary · '+currentYear;
+  const body=document.getElementById('cdBody');
+  const t=applyFilters(rawSheetData).length;
+  const wMap=getWilayahMap(applyFilters(rawSheetData));
+  const sub=Object.values(wMap).reduce((s,w)=>s+w.submitted,0);
+  const tot=Object.values(wMap).reduce((s,w)=>s+w.total,0);
+  if(label.includes('Pending'))body.innerHTML=`<div class="cd-summary"><div class="cd-sum-item"><div class="cd-sum-label">Pending</div><div class="cd-sum-val red">${tot-sub}</div></div><div class="cd-sum-item"><div class="cd-sum-label">% of Total</div><div class="cd-sum-val blue">${tot?Math.round((tot-sub)/tot*100):0}%</div></div></div><div style="color:var(--muted);padding:16px;font-size:12px;font-weight:600">Pending churches for ${currentMonth} ${currentYear}. Use the wilayah cards to drill down.</div>`;
+  else if(label.includes('Submitted'))body.innerHTML=`<div class="cd-summary"><div class="cd-sum-item"><div class="cd-sum-label">Submitted</div><div class="cd-sum-val green">${sub}</div></div><div class="cd-sum-item"><div class="cd-sum-label">Completion</div><div class="cd-sum-val blue">${tot?Math.round(sub/tot*100):0}%</div></div></div><div style="color:var(--muted);padding:16px;font-size:12px;font-weight:600">Churches submitted for ${currentMonth} ${currentYear}.</div>`;
+  else body.innerHTML=`<div style="color:var(--muted);padding:16px;font-size:12px;font-weight:600">${label}</div>`;
+  document.getElementById('cardDetailModal').classList.add('open');
+}
+
+// ── Anim ──
+function animBars(){document.querySelectorAll('.bfill,.wfill,.kpi-bar-fill').forEach(el=>{const w=el.style.width;el.style.width='0';requestAnimationFrame(()=>setTimeout(()=>{el.style.width=w},20))})}
+
+// ── Chat ──
+let chatOpen=false;
+function toggleChat(){
+  chatOpen=!chatOpen;
+  document.getElementById('chatPanel').classList.toggle('open',chatOpen);
+  if(chatOpen)document.getElementById('chatInput').focus();
+}
+function addChat(sender,text){
+  const c=document.getElementById('chatMessages');
+  const d=document.createElement('div');
+  d.className='chat-msg '+(sender==='user'?'chat-user':'chat-bot');
+  d.innerHTML=text;
+  c.appendChild(d);
+  c.scrollTop=c.scrollHeight;
+}
+function sendChat(){
+  const inp=document.getElementById('chatInput');
+  const q=inp.value.trim();if(!q)return;inp.value='';
+  addChat('user',q);
+  processChat(q);
+}
+function processChat(q){
+  const lq=q.toLowerCase().trim();
+  if(!rawSheetData||!rawSheetData.length){addChat('bot','No data loaded. Please wait for the data to load.');return}
+  if(lq.includes('help')||lq.includes('what can you do')||lq==='?'){
+    addChat('bot',"I can answer:<br>• \"How many churches?\"<br>• \"Pending for March?\"<br>• \"Show SDA Likas\"<br>• \"Submission rate?\"<br>• \"PIC for Wilayah 2?\"<br>• \"Change to 2024\"<br>• \"Show February\"");
+    return;
+  }
+  const entities={};
+  for(const[name,abbr] of Object.entries({january:'JAN',jan:'JAN',february:'FEB',feb:'FEB',march:'MAR',mar:'MAR',april:'APR',apr:'APR',may:'MAY',june:'JUN',jun:'JUN',july:'JUL',jul:'JUL',august:'AUG',aug:'AUG',september:'SEP',sep:'SEP',october:'OCT',oct:'OCT',november:'NOV',nov:'NOV',december:'DEC',dec:'DEC'})){
+    if(lq.includes(name)){entities.month=abbr;break}
+  }
+  const ym=lq.match(/20\d{2}/);if(ym)entities.year=ym[0];
+  const wm=lq.match(/wilayah\s*(\d+)/i);if(wm)entities.wilayah=wm[1];
+  const daer=[...new Set(rawSheetData.map(r=>r.daerah).filter(Boolean))];
+  for(const d of daer){if(d&&lq.includes(d.toLowerCase())){entities.daerah=d;break}}
+  const chur=[...new Set(rawSheetData.map(r=>r.gereja).filter(Boolean))];
+  for(const c of chur){if(c&&lq.includes(c.toLowerCase())){entities.church=c;break}}
+
+  let data=rawSheetData;
+  if(entities.wilayah)data=data.filter(r=>r.wilayah===entities.wilayah);
+  if(entities.daerah)data=data.filter(r=>r.daerah===entities.daerah);
+  if(entities.church)data=data.filter(r=>r.gereja===entities.church);
+
+  if(lq.includes('how many')||lq.includes('count')||lq.includes('total number')||lq.includes('number of')){
+    const m=entities.month||currentMonth;
+    const sub=countSub(data,m);const tot=countTot(data,m);
+    addChat('bot','📊 Total: '+data.length+' churches<br>✅ Submitted: '+sub+'/'+tot+' ('+(tot?Math.round(sub/tot*100):0)+'%)<br>⏳ Pending: '+(tot-sub));
+  }else if(lq.includes('pending')||lq.includes('not submit')||lq.includes('missing')||lq.includes('outstanding')){
+    const m=entities.month||currentMonth;
+    const list=data.filter(r=>(r.months[m]||'Pending')!=='Submitted');
+    if(entities.church){showChurchCard(data[0]);return}
+    let msg='🔴 Pending ('+m+' '+(entities.year||currentYear)+'):<br>';
+    if(!list.length)msg+='All churches submitted! 🎉';
+    else list.slice(0,15).forEach(r=>msg+='• '+r.gereja+' (W'+r.wilayah+')<br>');
+    if(list.length>15)msg+='… and '+(list.length-15)+' more.';
+    msg+='<br><br>Total: '+list.length+' pending';
+    addChat('bot',msg);
+  }else if(lq.includes('submitted')||lq.includes('done')||lq.includes('completed')||lq.includes('finished')){
+    const m=entities.month||currentMonth;
+    const list=data.filter(r=>(r.months[m]||'Pending')==='Submitted');
+    let msg='✅ Submitted ('+m+' '+(entities.year||currentYear)+'):<br>';
+    if(!list.length)msg+='None yet.';
+    else list.slice(0,15).forEach(r=>msg+='• '+r.gereja+' (W'+r.wilayah+')<br>');
+    if(list.length>15)msg+='… and '+(list.length-15)+' more.';
+    msg+='<br><br>Total: '+list.length+' submitted';
+    addChat('bot',msg);
+  }else if(lq.includes('show')||lq.includes('find')||lq.includes('detail')||lq.includes('what about')||lq.includes('tell me')||entities.church){
+    if(entities.church&&data.length){showChurchCard(data[0]);return}
+    if(entities.wilayah||entities.daerah){
+      const m=entities.month||currentMonth;
+      const sub=countSub(data,m);const tot=countTot(data,m);
+      let loc='';if(entities.wilayah)loc+=' Wilayah '+entities.wilayah;if(entities.daerah)loc+=' '+entities.daerah;
+      let msg='📋 '+data.length+' churches'+loc+':<br>✅ '+sub+'/'+tot+' ('+(tot?Math.round(sub/tot*100):0)+'%)<br><br>';
+      data.slice(0,10).forEach(r=>msg+='• '+(r.months[m]==='Submitted'?'✅':'🔴')+' '+r.gereja+'<br>');
+      if(data.length>10)msg+='… and '+(data.length-10)+' more.';
+      addChat('bot',msg);
+    }else addChat('bot','Try being specific — "show Wilayah 3" or "show SDA Likas".');
+  }else if(lq.includes('pic')||lq.includes('who is')||lq.includes('in charge')||lq.includes('responsible')){
+    const pics=[...new Set(data.map(r=>r.prPic).filter(p=>p&&p!=='-'))];
+    if(!pics.length){addChat('bot','No PIC info found.');return}
+    let loc='';if(entities.wilayah)loc+=' Wilayah '+entities.wilayah;if(entities.daerah)loc+=' '+entities.daerah;
+    addChat('bot','👤 PR PIC'+loc+':<br>'+pics.sort().map(p=>'• '+p+' ('+data.filter(r=>r.prPic===p).length+' churches)').join('<br>'));
+  }else if(lq.includes('percent')||lq.includes('rate')||lq.includes('completion')||lq.includes('progress')){
+    const m=entities.month||currentMonth;
+    const sub=countSub(data,m);const tot=countTot(data,m);
+    addChat('bot','📈 Submission rate: '+(tot?Math.round(sub/tot*100):0)+'%<br>✅ '+sub+' submitted / '+tot+' total');
+  }else if(lq.includes('year')&&entities.year){
+    if(entities.year!==currentYear){changeYear(entities.year);addChat('bot','✅ Switched to '+entities.year)}else addChat('bot','Already on '+currentYear);
+  }else if(entities.month&&(lq.includes('show')||lq.includes('go')||lq.includes('switch')||lq.includes('change')||!lq.includes('year'))){
+    if(viewOptions.includes(entities.month)){changeMonth(entities.month);addChat('bot','✅ Switched to '+entities.month+' '+currentYear)}else addChat('bot','Invalid month.');
+  }else addChat('bot',"I didn't understand. Try 'help' for examples.");
+}
+function countSub(data,m){return m==='FULL YEAR'?data.reduce((s,r)=>s+months.filter(mn=>r.months[mn]==='Submitted').length,0):data.filter(r=>(r.months[m]||'Pending')==='Submitted').length}
+function countTot(data,m){return m==='FULL YEAR'?data.length*12:data.length}
+function showChurchCard(c){
+  addChat('bot','🏛️ <strong>'+c.gereja+'</strong><br>📍 Wilayah '+c.wilayah+' · '+c.daerah+'<br>📋 Type: '+c.type+'<br>👤 PIC: '+(c.prPic||'—')+'<br>🔍 Audit: '+(c.audit||'—')+'<br><br>Monthly:<br>'+months.map(m=>'  '+m+': '+(c.months[m]==='Submitted'?'✅ Submitted':'🔴 Pending')).join('<br>'));
+}
+
+window.onload=init;
+</script>
 </body>
 </html>
